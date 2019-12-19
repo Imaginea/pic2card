@@ -56,6 +56,16 @@ download faster_rcnn_inception_v2_coco_2018_01_28 model and place it under objec
               }
               label_map_path: ---- full path to "training/object-detection.pbtxt"
                 }
+                
+    eval_input_reader: 
+               {
+              tf_record_input_reader {
+                input_path: ---- full path to "tf_records/test.record"
+              }
+              label_map_path: ---- full path to "/training/object-detection.pbtxt"
+              shuffle: false
+              num_readers: 1
+            }
     
 ### train model using below command 
 
