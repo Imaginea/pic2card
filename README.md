@@ -1,7 +1,7 @@
 # Mystique
 
-This repo contains code for converting adaptive cards GUI design image into Json 
-faster-rcnn neural model is used for this purpose
+This repo contains code for converting adaptive cards GUI design image into Json.
+Faster-rcnn neural model is used for this purpose
 
 #Environment Setup:
 
