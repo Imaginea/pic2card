@@ -41,7 +41,11 @@ example :
     python generate_tfrecord.py --csv_input=../images/train_labels.csv --image_dir=../images/train --output_path=../tf_records/train.record
     python generate_tfrecord.py --csv_input=../images/test_labels.csv --image_dir=../images/test --output_path=../tf_records/test.record
 
+### create label map 
+Edit training/object-detection.pbxt file to match the label maps mentioned in generate_tfrecord.py
 
+
+     
 
     
  
