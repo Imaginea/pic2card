@@ -44,8 +44,17 @@ example :
 ### create label map 
 Edit training/object-detection.pbxt file to match the label maps mentioned in generate_tfrecord.py
 
+### download the model(faster_rcnn_inception_v2_coco_2018_01_28) from [here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md)
+download faster_rcnn_inception_v2_coco_2018_01_28 model and place it under object_detection/training dir  
 
-     
+### set below paths appropriately in pipeline.config file
 
+    fine_tune_checkpoint ---- path to faster_rcnn_inception_v2_coco_2018_01_28/model.ckpt
+    tf_record_input_reader 
+               {
+                    input_path: ---- full path to "tf_records/train.record"
+              }
+              label_map_path: ---- full path to "training/object-detection.pbtxt"
+                }
     
  
