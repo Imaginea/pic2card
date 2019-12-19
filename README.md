@@ -9,13 +9,20 @@ This repo implements tensorflow research models, hence it necessary to have that
     
     https://github.com/tensorflow/models.git
 
-extend PYTHONPATH with newly cloned repo
+### Config Protobuf 
+The Tensorflow Object Detection API uses Protobufs to configure model and training parameters. 
+Before the framework can be used, the Protobuf libraries must be compiled
+Below link has steps to compile it 
+
+    https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
+
+### extend PYTHONPATH with newly cloned repo
     
     cd models/models/reseach/
     export PYTHONPATH=$PYTHONPATH:`pwd`
     export PYTHONPATH=$PYTHONPATH:`pwd`/slim
 
-# Steps for Object detection
+# 1) Steps for Object detection
 ### create csv files for train and test datasets
 
     cd utils
@@ -69,7 +76,7 @@ download faster_rcnn_inception_v2_coco_2018_01_28 model and place it under objec
     
 ### train model using below command 
 
-    python model_main.py --logtostderr --model_dir=training/ --pipeline_config_path=training/pipeline.config
+    python model_main.py --logtostderr --model_dir=training/ --pipeline_config_path=../training/pipeline.config
     
 ### export inference graph 
 After the model is trained, we can use it for prediction using inference graphs
