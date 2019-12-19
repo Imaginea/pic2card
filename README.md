@@ -57,4 +57,15 @@ download faster_rcnn_inception_v2_coco_2018_01_28 model and place it under objec
               label_map_path: ---- full path to "training/object-detection.pbtxt"
                 }
     
- 
+### train model using below command 
+
+    python model_main.py --logtostderr --model_dir=training/ --pipeline_config_path=training/pipeline.config
+    
+### export inference graph 
+After the model is trained, we can use it for prediction using inference graphs
+change XXXX to represent the highest number of trained model 
+
+    python export_inference_graph.py --input_type image_tensor --pipeline_config_path training/pipeline.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory ../inference_graph
+
+### predict 
+Jupyter notebook available under notebooks can be used for prediction
