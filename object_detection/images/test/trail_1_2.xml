@@ -1,7 +1,7 @@
 <annotation>
-	<folder>container</folder>
+	<folder>testing</folder>
 	<filename>trail_1_2.png</filename>
-	<path>/home/nandagopal/PycharmProjects/pic2code/obj_detection/images/just_images/container/trail_1_2.png</path>
+	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/images/testing/trail_1_2.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,10 +17,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>172</xmin>
-			<ymin>11</ymin>
-			<xmax>416</xmax>
-			<ymax>38</ymax>
+			<xmin>171</xmin>
+			<ymin>6</ymin>
+			<xmax>423</xmax>
+			<ymax>48</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -29,22 +29,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>194</xmin>
-			<ymin>56</ymin>
-			<xmax>399</xmax>
-			<ymax>85</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>textbox</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>7</xmin>
-			<ymin>97</ymin>
-			<xmax>356</xmax>
-			<ymax>126</ymax>
+			<xmin>191</xmin>
+			<ymin>52</ymin>
+			<xmax>396</xmax>
+			<ymax>92</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -54,9 +42,21 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>7</xmin>
+			<ymin>99</ymin>
+			<xmax>368</xmax>
+			<ymax>136</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>textbox</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>11</xmin>
 			<ymin>231</ymin>
-			<xmax>374</xmax>
-			<ymax>258</ymax>
+			<xmax>381</xmax>
+			<ymax>264</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -65,34 +65,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>217</xmin>
-			<ymin>365</ymin>
-			<xmax>371</xmax>
-			<ymax>394</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>radio_button</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>8</xmin>
-			<ymin>139</ymin>
-			<xmax>90</xmax>
-			<ymax>160</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>radio_button</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>8</xmin>
-			<ymin>167</ymin>
-			<xmax>108</xmax>
-			<ymax>189</ymax>
+			<xmin>216</xmin>
+			<ymin>366</ymin>
+			<xmax>387</xmax>
+			<ymax>395</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -102,9 +78,33 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>6</xmin>
-			<ymin>195</ymin>
-			<xmax>95</xmax>
-			<ymax>216</ymax>
+			<ymin>140</ymin>
+			<xmax>104</xmax>
+			<ymax>161</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>radio_button</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>8</xmin>
+			<ymin>164</ymin>
+			<xmax>119</xmax>
+			<ymax>195</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>radio_button</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>10</xmin>
+			<ymin>193</ymin>
+			<xmax>124</xmax>
+			<ymax>223</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -113,9 +113,9 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>9</xmin>
-			<ymin>271</ymin>
-			<xmax>91</xmax>
+			<xmin>3</xmin>
+			<ymin>264</ymin>
+			<xmax>105</xmax>
 			<ymax>294</ymax>
 		</bndbox>
 	</object>
@@ -125,10 +125,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>8</xmin>
+			<xmin>9</xmin>
 			<ymin>300</ymin>
-			<xmax>109</xmax>
-			<ymax>323</ymax>
+			<xmax>124</xmax>
+			<ymax>324</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -138,21 +138,9 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>8</xmin>
-			<ymin>326</ymin>
-			<xmax>93</xmax>
-			<ymax>347</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>checkbox</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>7</xmin>
-			<ymin>407</ymin>
-			<xmax>477</xmax>
-			<ymax>436</ymax>
+			<ymin>321</ymin>
+			<xmax>106</xmax>
+			<ymax>355</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -162,9 +150,21 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>5</xmin>
-			<ymin>447</ymin>
-			<xmax>375</xmax>
-			<ymax>475</ymax>
+			<ymin>409</ymin>
+			<xmax>489</xmax>
+			<ymax>440</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>checkbox</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>3</xmin>
+			<ymin>440</ymin>
+			<xmax>377</xmax>
+			<ymax>480</ymax>
 		</bndbox>
 	</object>
 </annotation>
