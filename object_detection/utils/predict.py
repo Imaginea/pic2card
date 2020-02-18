@@ -11,6 +11,7 @@ import tensorflow as tf
 import zipfile
 import re
 import json
+import pytesseract
 import os
 from distutils.version import StrictVersion
 from collections import defaultdict
@@ -87,21 +88,32 @@ def get_card_json(objects):
         body=[]
         for object in objects:
             if object.get('object')=="textbox":
-                body.append({
+                if len(object.get('text','').split())>=10:
+                    body.append( {
+                        "type": "RichTextBlock",
+                        "inlines": [
+                        {
+                        "type": "TextRun",
+                        "text": object.get('text','')
+                        }
+                        ]
+                        })
+                else:
+                    body.append({
                     "type": "TextBlock",
-                    "text": ""
+                    "text": object.get('text','')
                     })
             if object.get('object')=="checkbox":
                 body.append({
                     "type": "Input.Toggle",
-                    "title": ""
+                    "title": object.get('text','')
                     })
             if object.get('object')=="radio_button":
                 body.append( {
                     "type": "Input.ChoiceSet",
                     "choices": [
                         {
-                            "title": "",
+                            "title": object.get('text',''),
                             "value": ""
                             }
                         ],
@@ -114,6 +126,10 @@ def get_card_json(objects):
                     })
         return body
 
+def get_text(image, coords):
+    cropped_image = image.crop(coords)
+    data = pytesseract.image_to_string(cropped_image, lang='eng',config='--psm 6')
+    return data
 
 
 def main(input_file_path):
@@ -165,7 +181,7 @@ def main(input_file_path):
                         draw.text((xmin-10.0, ymin-10.0), text,fill="green",width=3)
                         
                     r,c=boxes.shape
-                    draw = ImageDraw.Draw(image_pillow)
+                    #draw = ImageDraw.Draw(image_pillow)
                     json_object={"file_name":image}
                     json_object['objects']=[]
                     for i in range(r):
@@ -188,10 +204,12 @@ def main(input_file_path):
                         object_json['ymin']=str(ymin)
                         object_json['xmax']=str(xmax)
                         object_json['ymax']=str(ymax)
+                        object_json['text']=get_text(image_pillow,((xmin, ymin, xmax,ymax )))
                         json_object['objects'].append(object_json)
+
                         
                         
-                        draw_bounding_box_on_image(image_pillow,ymin,xmin,ymax,xmax)                    
+                        #draw_bounding_box_on_image(image_pillow,ymin,xmin,ymax,xmax)                    
                     
                     
                     vis_util.visualize_boxes_and_labels_on_image_array(

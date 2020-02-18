@@ -20,7 +20,7 @@ class PredictJson(Resource):
         
         imgdata = base64.b64decode(request.json.get('image',''))
         image=Image.open(io.BytesIO(imgdata))
-        suffic_timestamp = dt.now().strftime('_%Y_%m_%d_%H-%M-%S') + '.png'
+        suffic_timestamp = dt.now().strftime('_%Y_%m_%d_%H-%M-%S')
         file_path = os.path.join(input_image_collection, "Input_Image"+suffic_timestamp+".png")
         image.save(file_path)
         logger.debug(f"saving file {file_path}")

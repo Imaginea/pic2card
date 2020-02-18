@@ -89,4 +89,5 @@ subprocess
 logging
 flask_restplus
 Pillow
-
+pytesseract
+tarfile
