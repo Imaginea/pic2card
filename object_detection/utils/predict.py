@@ -225,6 +225,13 @@ def main(input_file_path):
                         min_score_thresh=0.7
                         )
                     return_dict["image"]=base64.b64encode(cv2.imencode('predicted.jpg', image_np)[1]).decode("utf-8")
+                    for obj in range(len(json_object.get('objects'))-1,0,-1):
+                        for i in range(obj):
+                            if float(json_object.get('objects')[i].get('ymin'))>float(json_object.get('objects')[i+1].get('ymin')):
+                                temp = json_object.get('objects')[i]
+                                json_object.get('objects')[i] = json_object.get('objects')[i+1]
+                                json_object.get('objects')[i+1] = temp
+                                
                     card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
                     card_json["body"]=get_card_json(json_object.get('objects',[]))
                     return_dict["card_json"]=card_json

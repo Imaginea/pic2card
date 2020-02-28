@@ -3,6 +3,7 @@ from flask import request
 from flask_restplus import Api
 import logging
 from resources import PredictJson
+from flask_cors import CORS
 from logging.handlers import RotatingFileHandler
 
 logger = logging.getLogger("mysitque")
@@ -18,6 +19,7 @@ logger.addHandler(file_handler)
 app = Flask(__name__)
 api = Api(app, title="Mystique", version="1.0", default="Jobs", default_label="",
         description="Mysique App For Adaptive card Json Prediction from UI Design",)
+CORS(app)
 
 
 api.add_resource(PredictJson, '/predict_json',  methods = ['POST'])

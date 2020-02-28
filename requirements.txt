@@ -91,3 +91,4 @@ flask_restplus
 Pillow
 pytesseract
 tarfile
+flask-cors
