@@ -4,6 +4,7 @@
 import base64
 import numpy as np
 import os
+import math
 import sys
 import subprocess
 import tarfile
@@ -12,10 +13,12 @@ import zipfile
 import re
 import json
 import pytesseract
+from pytesseract import pytesseract
 import os
 from distutils.version import StrictVersion
 from collections import defaultdict
 from io import StringIO
+from PIL import Image, ImageDraw, ImageFont
 from matplotlib import pyplot as plt
 from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import csv
@@ -24,7 +27,7 @@ import argparse
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
-sys.path.append("/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/models/research")
+sys.path.append("/home/vasanth/mystique/models/research")
 from object_detection.utils import ops as utils_ops
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
@@ -34,9 +37,9 @@ from object_detection.utils import label_map_util
 
 from object_detection.utils import visualization_utils as vis_util
 
-MODEL_NAME = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/inference_graph'
+MODEL_NAME = '/home/vasanth/mystique/object_detection/inference_graph'
 PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
-PATH_TO_LABELS = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/training/object-detection.pbtxt'
+PATH_TO_LABELS = '/home/vasanth/mystique/object_detection/training/object-detection.pbtxt'
 
 
 detection_graph = tf.Graph()
@@ -88,25 +91,57 @@ def get_card_json(objects):
         body=[]
         for object in objects:
             if object.get('object')=="textbox":
+                size='Default'
+                if float(object.get('size'))==-1:
+                    size="Default"
+                elif float(object.get('size'))>=0 and  float(object.get('size'))<=5:
+                    size="Small"
+                elif float(object.get('size'))>5 and  float(object.get('size'))<=10:
+                    size="Medium"
+                elif float(object.get('size'))>15 and  float(object.get('size'))<=20:
+                    size="Large"
+                elif float(object.get('size'))>20:
+                    size="ExtraLarge"
+                weight='Default'    
+                if object.get('weight',0)>=0 and object.get('weight',0)<=50:
+                    weight='Lighter'
+                elif object.get('weight',0)>50 and object.get('weight',0)<=90:
+                    weight='Default'
+                elif object.get('weight',0)>90:
+                    weight='Bolder'
+
+
+
                 if len(object.get('text','').split())>=10:
                     body.append( {
                         "type": "RichTextBlock",
                         "inlines": [
                         {
                         "type": "TextRun",
-                        "text": object.get('text','')
+                        "text": object.get('text',''),
+                        "size":size,
+                        "horizontalAlignment":object.get('horizontal_alignment',''),
+                        "color":object.get('color','Default'),
+                        #"weight":weight,
+                        #"coords":object.get('coords','')
                         }
                         ]
                         })
                 else:
                     body.append({
                     "type": "TextBlock",
-                    "text": object.get('text','')
+                    "text": object.get('text',''),
+                    "size":size,
+                    "horizontalAlignment":object.get('horizontal_alignment',''),
+                    "color":object.get('color','Default'),
+                    #"weight":weight,
+                    #"coords":object.get('coords','')
                     })
             if object.get('object')=="checkbox":
                 body.append({
                     "type": "Input.Toggle",
-                    "title": object.get('text','')
+                    "title": object.get('text',''),
+                    #"coords":object.get('coords','')
                     })
             if object.get('object')=="radio_button":
                 body.append( {
@@ -114,15 +149,17 @@ def get_card_json(objects):
                     "choices": [
                         {
                             "title": object.get('text',''),
-                            "value": ""
+                            "value": "",
+                            #"coords":object.get('coords','')
                             }
                         ],
-                    "style": "expanded"
+                     "style": "expanded"
                     })
             if object.get('object')=="image":
                 body.append( {
                     "type": "Image",
-                    "altText": ""
+                    "altText": "",
+                    #"coords":object.get('coords','')
                     })
         return body
 
@@ -130,6 +167,76 @@ def get_text(image, coords):
     cropped_image = image.crop(coords)
     data = pytesseract.image_to_string(cropped_image, lang='eng',config='--psm 6')
     return data
+
+def get_size(image,coords):
+    cropped_image = image.crop(coords)
+    hocr=pytesseract.image_to_pdf_or_hocr(cropped_image, extension='hocr',lang='eng')
+    hocr_text=hocr.decode("utf-8")
+    pattern=re.compile(r"x_size\s*=*\s*\d+\.*\d*")
+    if re.findall(pattern,hocr_text):
+        return float(re.findall(pattern,hocr_text)[0].strip('x_size '))
+    else:
+        return -1
+
+def get_alignment(image,xmin,xmax):
+    avg=math.ceil((xmin+xmax)/2)
+    w,h=image.size
+    if (avg/w)*100 >=0 and (avg/w)*100 <45:
+        return "Left"
+    elif (avg/w)*100 >=45 and (avg/w)*100 <55:
+        return "Center"
+    else:
+        return "Right"
+
+def get_distance(v1, v2):
+    return np.sqrt(np.sum((v1 - v2) ** 2))
+
+def get_colors(image,coords):
+    cropped_image = image.crop(coords)
+    cropped_image.save("temp_image.png")
+    q = cropped_image.quantize(colors=2,method=2)
+    dominant_color= q.getpalette()[3:6]
+    
+    colors={
+        "Attention":(255,0,0),
+        "Accent":(0,0,255),
+        "Good":(0,128,0),
+        "Dark":(0,0,0),
+        "Light":(255,255,255),
+        "Warning":(255,255,0)
+    }
+    color='Default'
+    found_colors=[]
+    distances=[]
+    for key,values in colors.items():
+        distance=get_distance(np.asarray(values),np.asarray(dominant_color))
+        if distance<=150:
+            found_colors.append(key)
+            distances.append(distance)
+    if found_colors!=[]:
+        index=distances.index(min(distances))
+        color=found_colors[index]
+        if found_colors[index]=="Light":
+            background=q.getpalette()[:3]
+            foreground=q.getpalette()[3:6]
+            distance=get_distance(np.asarray(background),np.asarray(foreground))
+            if distance<150:
+                color='Default'
+    return color
+    
+
+
+
+def get_text_weight(image,coords,text,size):
+    cropped_image = image.crop(coords)
+    draw = ImageDraw.Draw(cropped_image)
+    size=int(math.ceil(size))
+    #print(size)
+    font = ImageFont.truetype('/home/vasanth/mystique/object_detection/arial.ttf', size)
+    #font = ImageFont.load_default()
+    ascent, descent = font.getmetrics()
+    (width, baseline), (offset_x, offset_y) = font.font.getsize(text)
+    return width
 
 
 def main(input_file_path):
@@ -204,7 +311,13 @@ def main(input_file_path):
                         object_json['ymin']=str(ymin)
                         object_json['xmax']=str(xmax)
                         object_json['ymax']=str(ymax)
+                        object_json['coords']=','.join([str(xmin),str(ymin),str(xmax),str(ymax)])
                         object_json['text']=get_text(image_pillow,((xmin, ymin, xmax,ymax )))
+                        if object_json['object']=="textbox":
+                            object_json["size"]=get_size(image_pillow,((xmin, ymin, xmax,ymax )))
+                            object_json["horizontal_alignment"]=get_alignment(image_pillow,float(xmin),float(xmax))
+                            object_json['color']=get_colors(image_pillow,((xmin, ymin, xmax,ymax )))
+                            object_json['weight']=get_text_weight(image_pillow,((xmin, ymin, xmax,ymax )),object_json['text'],object_json['size'])
                         json_object['objects'].append(object_json)
 
                         
@@ -234,10 +347,11 @@ def main(input_file_path):
                                 
                     card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
                     card_json["body"]=get_card_json(json_object.get('objects',[]))
+                    #print(card_json,"\n\nJSON")
+
                     return_dict["card_json"]=card_json
                     print(json.dumps(return_dict))
-                    
-                
+               
 
 if __name__ == '__main__':
 
@@ -246,6 +360,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     main(args.image_path)
-
 
 
