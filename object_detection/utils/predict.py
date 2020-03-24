@@ -91,26 +91,6 @@ def get_card_json(objects):
         body=[]
         for object in objects:
             if object.get('object')=="textbox":
-                size='Default'
-                if float(object.get('size'))==-1:
-                    size="Default"
-                elif float(object.get('size'))>=0 and  float(object.get('size'))<=5:
-                    size="Small"
-                elif float(object.get('size'))>5 and  float(object.get('size'))<=10:
-                    size="Medium"
-                elif float(object.get('size'))>15 and  float(object.get('size'))<=20:
-                    size="Large"
-                elif float(object.get('size'))>20:
-                    size="ExtraLarge"
-                weight='Default'    
-                if object.get('weight',0)>=0 and object.get('weight',0)<=50:
-                    weight='Lighter'
-                elif object.get('weight',0)>50 and object.get('weight',0)<=90:
-                    weight='Default'
-                elif object.get('weight',0)>90:
-                    weight='Bolder'
-
-
 
                 if len(object.get('text','').split())>=10:
                     body.append( {
@@ -119,11 +99,11 @@ def get_card_json(objects):
                         {
                         "type": "TextRun",
                         "text": object.get('text',''),
-                        "size":size,
+                        "size":object.get('size',''),
                         "horizontalAlignment":object.get('horizontal_alignment',''),
                         "color":object.get('color','Default'),
-                        #"weight":weight,
-                        #"coords":object.get('coords','')
+                        "weight":object.get('weight',''),
+                        "coords":object.get('coords','')
                         }
                         ]
                         })
@@ -131,17 +111,17 @@ def get_card_json(objects):
                     body.append({
                     "type": "TextBlock",
                     "text": object.get('text',''),
-                    "size":size,
+                    "size":object.get('size',''),
                     "horizontalAlignment":object.get('horizontal_alignment',''),
                     "color":object.get('color','Default'),
-                    #"weight":weight,
-                    #"coords":object.get('coords','')
+                    "weight":object.get('weight',''),
+                    "coords":object.get('coords','')
                     })
             if object.get('object')=="checkbox":
                 body.append({
                     "type": "Input.Toggle",
                     "title": object.get('text',''),
-                    #"coords":object.get('coords','')
+                    "coords":object.get('coords','')
                     })
             if object.get('object')=="radio_button":
                 body.append( {
@@ -150,7 +130,7 @@ def get_card_json(objects):
                         {
                             "title": object.get('text',''),
                             "value": "",
-                            #"coords":object.get('coords','')
+                            "coords":object.get('coords','')
                             }
                         ],
                      "style": "expanded"
@@ -159,7 +139,7 @@ def get_card_json(objects):
                 body.append( {
                     "type": "Image",
                     "altText": "",
-                    #"coords":object.get('coords','')
+                    "coords":object.get('coords','')
                     })
         return body
 
@@ -168,15 +148,55 @@ def get_text(image, coords):
     data = pytesseract.image_to_string(cropped_image, lang='eng',config='--psm 6')
     return data
 
-def get_size(image,coords):
+def get_size_and_weight(image,coords):
     cropped_image = image.crop(coords)
-    hocr=pytesseract.image_to_pdf_or_hocr(cropped_image, extension='hocr',lang='eng')
-    hocr_text=hocr.decode("utf-8")
-    pattern=re.compile(r"x_size\s*=*\s*\d+\.*\d*")
-    if re.findall(pattern,hocr_text):
-        return float(re.findall(pattern,hocr_text)[0].strip('x_size '))
+    cropped_image.save("temp_image.png")
+    img=cv2.imread("temp_image.png")
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.blur(gray, (5,5))
+
+    kernel = np.ones((5, 5), np.uint8)
+    closing = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
+
+    edged = cv2.Canny(img, 30, 200)
+    cv2.imshow("Canny", edged)
+    _, contours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    box_width=[]
+    box_height=[]
+
+    for c in contours:
+        rect = cv2.minAreaRect(c)
+        (x,y,w,h) = cv2.boundingRect(c)
+        box_width.append(w)
+        box_height.append(h)
+
+    weights=sum(box_width)/len(box_width)
+    heights=sum(box_height)/len(box_height)
+    size='Default'
+    weight='Default'
+
+    if heights<=5.5:
+        size='Small'
+    elif heights>5.5 and heights<=7:
+        size='Default'
+    elif heights>7 and heights<=9:
+        size="Medium"
+    elif heights>9 and heights<=10:
+        size="Large"
     else:
-        return -1
+        size="ExtraLarge"
+    
+    if (size=="Small" or size=="Default") and weights>=5:
+        weight="Bolder"
+    elif size=="Medium" and weights>6.5:
+        weight="Bolder"
+    elif size=="Large" and weights>8:
+        weights="Bolder"
+    elif size=="ExtraLarge" and weights>9:
+        weight="Bolder"
+
+    
+    return size,weight
 
 def get_alignment(image,xmin,xmax):
     avg=math.ceil((xmin+xmax)/2)
@@ -227,18 +247,6 @@ def get_colors(image,coords):
 
 
 
-def get_text_weight(image,coords,text,size):
-    cropped_image = image.crop(coords)
-    draw = ImageDraw.Draw(cropped_image)
-    size=int(math.ceil(size))
-    #print(size)
-    font = ImageFont.truetype('/home/vasanth/mystique/object_detection/arial.ttf', size)
-    #font = ImageFont.load_default()
-    ascent, descent = font.getmetrics()
-    (width, baseline), (offset_x, offset_y) = font.font.getsize(text)
-    return width
-
-
 def main(input_file_path):
     return_dict={"image":'',"card_json":''}
     with detection_graph.as_default():
@@ -272,28 +280,13 @@ def main(input_file_path):
                     width,height = image_pillow.size
                     boxes=output_dict['detection_boxes']
                     scores=output_dict['detection_scores']
-                    classes=output_dict['detection_classes']
-                    def draw_bounding_box_on_image(image,ymin,xmin,ymax,xmax,color='red',thickness=4,display_str_list=(),use_normalized_coordinates=True):
-                        
-                        im_width, im_height = image.size
-                        if use_normalized_coordinates:
-                            (left, right, top, bottom) = (xmin * im_width, xmax * im_width,ymin * im_height, ymax * im_height)
-                        draw.rectangle([(xmin,ymin),(xmax,ymax)], outline="red",width=3)
-                        xi=str(round(xmin, 2))
-                        yi=str(round(ymin, 2))
-                        xa=str(round(xmax, 2))
-                        ya=str(round(ymax, 2))
-                        text="("+str(xi)+","+str(yi)+"),("+str(xa)+","+str(ya)+")"
-                        
-                        draw.text((xmin-10.0, ymin-10.0), text,fill="green",width=3)
-                        
+                    classes=output_dict['detection_classes']                        
                     r,c=boxes.shape
-                    #draw = ImageDraw.Draw(image_pillow)
                     json_object={"file_name":image}
                     json_object['objects']=[]
                     for i in range(r):
                       
-                      if scores[i]*100>=70.0:
+                      if scores[i]*100>=60.0:
                         object_json=dict().fromkeys(['object','xmin','ymin','xmax','ymax'],'')
                         if str(classes[i])=="1":
                             object_json['object']="textbox"         
@@ -314,17 +307,13 @@ def main(input_file_path):
                         object_json['coords']=','.join([str(xmin),str(ymin),str(xmax),str(ymax)])
                         object_json['text']=get_text(image_pillow,((xmin, ymin, xmax,ymax )))
                         if object_json['object']=="textbox":
-                            object_json["size"]=get_size(image_pillow,((xmin, ymin, xmax,ymax )))
+                            
+                            object_json["size"],object_json['weight']=get_size_and_weight(image_pillow,((xmin, ymin, xmax,ymax )))
                             object_json["horizontal_alignment"]=get_alignment(image_pillow,float(xmin),float(xmax))
                             object_json['color']=get_colors(image_pillow,((xmin, ymin, xmax,ymax )))
-                            object_json['weight']=get_text_weight(image_pillow,((xmin, ymin, xmax,ymax )),object_json['text'],object_json['size'])
                         json_object['objects'].append(object_json)
 
-                        
-                        
-                        #draw_bounding_box_on_image(image_pillow,ymin,xmin,ymax,xmax)                    
-                    
-                    
+ 
                     vis_util.visualize_boxes_and_labels_on_image_array(
                         image_np,
                         output_dict['detection_boxes'],
@@ -335,7 +324,7 @@ def main(input_file_path):
                         use_normalized_coordinates=True,
                         line_thickness=5,
                         skip_scores=False,
-                        min_score_thresh=0.7
+                        min_score_thresh=0.6
                         )
                     return_dict["image"]=base64.b64encode(cv2.imencode('predicted.jpg', image_np)[1]).decode("utf-8")
                     for obj in range(len(json_object.get('objects'))-1,0,-1):
@@ -347,7 +336,7 @@ def main(input_file_path):
                                 
                     card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
                     card_json["body"]=get_card_json(json_object.get('objects',[]))
-                    #print(card_json,"\n\nJSON")
+                    os.remove('temp_image.png')
 
                     return_dict["card_json"]=card_json
                     print(json.dumps(return_dict))
