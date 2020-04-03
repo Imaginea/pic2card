@@ -26,4 +26,5 @@ class PredictJson(Resource):
         logger.debug(f"saving file {file_path}")
         # Call Prediction Script ---> and send file location
         return_json=subprocess.check_output([sys.executable, "object_detection/utils/predict.py", "--image_path={}".format(file_path)])
+        #print(return_json)
         return json.loads(return_json.decode("utf-8"))
