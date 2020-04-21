@@ -38,14 +38,14 @@ from object_detection.utils import label_map_util
 
 from object_detection.utils import visualization_utils as vis_util
 
-#MODEL_NAME = '/home/vasanth/mystique/object_detection/inference_graph'
+MODEL_NAME = '/home/vasanth/mystique/object_detection/inference_graph9000'
 #MODEL_NAME = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/inference_graph'
-MODEL_NAME = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/data_varaiance_graph/inference_graph7274'
+#MODEL_NAME = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/data_varaiance_graph/inference_graph9000'
 
 PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
-#PATH_TO_LABELS = '/home/vasanth/mystique/object_detection/training/object-detection.pbtxt'
+PATH_TO_LABELS = '/home/vasanth/mystique/object_detection/training_variance/object-detection.pbtxt'
 #PATH_TO_LABELS = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/gitlab/mystique/object_detection/training/object-detection.pbtxt'
-PATH_TO_LABELS = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/data_varaince_files/training_variance/object-detection.pbtxt'
+#PATH_TO_LABELS = '/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/object_detection/data_varaince_files/training_variance/object-detection.pbtxt'
 
 
 
@@ -66,7 +66,7 @@ Returns:
     [Boolean] -- [if overlaps or not]
 """
 def contains(point, coords):
-  return (float(coords[0])<=point[0]+10<=float(coords[2])) and (float(coords[1])<=point[1]+10<=float(coords[3]))
+  return (float(coords[0])<=point[0]+5<=float(coords[2])) and (float(coords[1])<=point[1]+5<=float(coords[3]))
 
 
 
@@ -78,16 +78,23 @@ Returns:
 def image_crop_get_url(coords_list,img_pillow):
   images=[] 
   image_coords=[] 
-  ctr=0
+  #ctr=0
   for coords in coords_list:
     cropped=img_pillow.crop((coords[0],coords[1],coords[2],coords[3]))
-    cropped.save("temp_image"+str(ctr)+".png")
-    ctr+=1
-    #img=open("tmep_image.png","rb").read()
-    #base64_string=base64.b64encode(img).decode()
-    #reponse=requests.post(url="https://api.imgur.com/3/image",data={"image":base64_string},headers={"Authorization":"Client-ID 017c383a18f0d47"})
-    #images.append(reponse.json().get('data',{}).get('link',''))
-    images.append("")
+    cropped.save("image_detected.png")
+    img=open("image_detected.png","rb").read()
+    base64_string=base64.b64encode(img).decode()
+    url = "https://post.imageshack.us/upload_api.php"
+    payload = {'key': 'DXOLV1ZA47ad805e246e758984d1198e982c0b8f',
+    'format': 'json',
+    'tags': 'sample',
+    'public': 'yes'}
+    files = [
+        ('fileupload', open('image_detected.png','rb'))
+        ]
+    response = requests.request("POST", url, data = payload, files = files)
+    images.append(response.json().get("links",{}).get("image_link",''))
+    # images.append("")
     image_coords.append(coords)
   return images
 
@@ -122,7 +129,7 @@ def image_detection(img,detected_coords,img_pillow):
           if j < len(image_points) and i < len(image_points):
             box1=[float(c) for c  in image_points[i]]
             box2=[float(c) for c  in image_points[j]]
-            intersection=FindPoints(box1[0],box1[1],box1[2],box1[3],box2[0],box2[1],box2[2],box2[3])
+            intersection=FindPoints(box1[0],box1[1],box1[2],box1[3],box2[0],box2[1],box2[2],box2[3],image=True)
             conatin=contains(box1,box2)
             if intersection and contains:
                 if box1!=box2:
@@ -211,6 +218,14 @@ def group_image_objects(image_objects,body,ymins,objects):
     
     #now put similar ymin grouped objects into a imageset - if a group has more than one image object
     for group in groups:
+        
+        for obj in range(len(group)-1,0,-1):
+            for i in range(obj):
+                if float(group[i].get('xmin'))>float(group[i+1].get('xmin')):
+                    temp = group[i]
+                    group[i]=group[i+1]
+                    group[i+1] = temp
+
         if len(group)>1:
             image_set= {
             "type": "ImageSet",
@@ -223,7 +238,7 @@ def group_image_objects(image_objects,body,ymins,objects):
                 "altText": "Image",
                 "horizontalAlignment": object.get('horizontal_alignment',''),
                 "url":object.get('url'),
-                "coords":object.get('coords','')
+                #"coords":object.get('coords','')
                 }
                 image_set['images'].append(obj)
 
@@ -244,12 +259,12 @@ def append_objects(object,body,ymins=None,column=None):
                 "altText": "Image",
                 "horizontalAlignment": object.get('horizontal_alignment',''),
                 "url":object.get('url'),
-                "coords":object.get('coords','')
+                #"coords":object.get('coords','')
                 })
         if ymins!=None:
             ymins.append(object.get('ymin'))
     if object.get('object')=="textbox":
-        if (len(object.get('text','').split())>=11 and not column) or (column and len(object.get('text',''))>=10):
+        if (len(object.get('text','').split())>=11 and not column) or (column and len(object.get('text',''))>=15):
             body.append( {
                         "type": "RichTextBlock",
                         "inlines": [
@@ -260,7 +275,7 @@ def append_objects(object,body,ymins=None,column=None):
                         "horizontalAlignment":object.get('horizontal_alignment',''),
                         "color":object.get('color','Default'),
                         "weight":object.get('weight',''),
-                        "coords":object.get('coords','')
+                        #"coords":object.get('coords','')
                         }
                         ]
                         })
@@ -274,7 +289,7 @@ def append_objects(object,body,ymins=None,column=None):
                     "horizontalAlignment":object.get('horizontal_alignment',''),
                     "color":object.get('color','Default'),
                     "weight":object.get('weight',''),
-                    "coords":object.get('coords','')
+                    #"coords":object.get('coords','')
                     })
             if ymins!=None:
                 ymins.append(object.get('ymin'))
@@ -282,7 +297,8 @@ def append_objects(object,body,ymins=None,column=None):
             body.append({
                     "type": "Input.Toggle",
                     "title": object.get('text',''),
-                    "coords":object.get('coords','')
+                    #"coords":object.get('coords',''),
+                    #"score":str(object.get('score',''))
                     })
             if ymins!=None:
                 ymins.append(object.get('ymin'))
@@ -292,7 +308,7 @@ def return_position(groups,obj):
     for i in range(len(groups)):
         if obj in groups[i]:
             return i
-    return 0
+    return -1
 
 """[Group choices into numebr of choicesets]
 
@@ -318,10 +334,13 @@ def group_choicesets(radiobutons,body,ymins=None):
                 difference=float(radiobutons[i].get('ymax'))-b
             if abs(difference)<=10  and difference_in_ymin<=30 and j not in positions_grouped:
                 if i in positions_grouped:
-                   position=return_position(groups,radiobutons[i])
-                   if position <len(groups):
+                    position=return_position(groups,radiobutons[i])
+                    if position <len(groups) and position>=0:
                        groups[position].append(radiobutons[j]) 
                        positions_grouped.append(j)
+                    elif radiobutons[i] in l:
+                        l.append(radiobutons[j])
+                        positions_grouped.append(j)
                 else:
                     l.append(radiobutons[j])
                     positions_grouped.append(j)
@@ -329,8 +348,17 @@ def group_choicesets(radiobutons,body,ymins=None):
                     
                 
     
+        
         if l!=[]:
-            groups.append(l)
+            flag=False
+            for gr in groups:
+                for ll in l:
+                    if ll in gr:
+                        flag=True
+
+            if flag==False:
+                groups.append(l)
+
     for group in groups:
         for ob in range(len(group)-1,0,-1):
             for i in range(ob):
@@ -344,11 +372,13 @@ def group_choicesets(radiobutons,body,ymins=None):
                 "choices": [],
                 "style": "expanded"
         }
+       
         for obj in group:
             choice_set['choices'].append({
                 "title": obj.get('text',''),
                         "value": "",
-                        "coords":obj.get('coords','')
+                        #"coords":obj.get('coords',''),
+                        #"score":str(obj.get('score',''))
                         })
         
         body.append(choice_set)
@@ -414,6 +444,8 @@ def get_card_json(objects,images_number):
                             group[i+1] = temp
 
                 for obj in group:
+                    
+                    
                 
                     colummn_set['columns'].append({
                         "type": "Column",
@@ -432,24 +464,32 @@ def get_card_json(objects,images_number):
 
                     if obj.get('object')=="radiobutton":
                         radio_buttons_dict['columnset']=radio_buttons_dict['columnset'].fromkeys([ctr],[])
-                        radio_buttons_dict['columnset'][ctr].append(group[0])
+                        radio_buttons_dict['columnset'][ctr].append(obj)
+                        
                     else:
                         append_objects(obj,colummn_set['columns'][ctr].get('items',[]),column=True)
+                        
                         
                     ctr+=1                        
 
                     
                    
-                if len(radio_buttons_dict['columnset'])>0:
-                      if ctr-1 !=-1  and ctr-1 < len(colummn_set['columns']) and ctr-1 <len(radio_buttons_dict['columnset']):
-                        group_choicesets(radio_buttons_dict['columnset'][ctr-1],colummn_set['columns'][ctr-1].get('items',[]))
+                if len(radio_buttons_dict['columnset'])>0: 
+                    if ctr-1 !=-1  and ctr-1 <=len(colummn_set['columns']) and len(radio_buttons_dict['columnset'])>0:
+                        if radio_buttons_dict['columnset'].get(ctr-1):
+                            group_choicesets(radio_buttons_dict['columnset'].get(ctr-1),colummn_set['columns'][ctr-1].get('items',[]))
                 
                 
                 if colummn_set not in body:
+                    for column in colummn_set['columns']:
+                        if column.get('items',[])==[]:
+                            del colummn_set['columns'][colummn_set['columns'].index(column)]
+
                     body.append(colummn_set)
                     ymins.append(group[0].get('ymin',''))
         if len(radio_buttons_dict['normal'])>0:
-            group_choicesets(radio_buttons_dict['normal'],body,ymins=ymins)
+                group_choicesets(radio_buttons_dict['normal'],body,ymins=ymins)
+
        
         return body,ymins
 
@@ -480,10 +520,9 @@ def get_size_and_weight(image,coords):
 
     kernel = np.ones((5, 5), np.uint8)
     closing = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
-
-    edged = cv2.Canny(img, 30, 200)
+    
     #edge detection
-    cv2.imshow("Canny", edged)
+    edged = cv2.Canny(img, 30, 200)
     #contours bulding
     _, contours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     box_width=[]
@@ -595,7 +634,7 @@ Returns:
     [Boolean] -- [True if intersects]
 """
 def FindPoints(x1, y1, x2, y2,  
-               x3, y3, x4, y4): 
+               x3, y3, x4, y4,image=None): 
   
     x5 = max(x1, x3) 
     y5 = max(y1, y3) 
@@ -604,7 +643,18 @@ def FindPoints(x1, y1, x2, y2,
   
     if (x5 > x6 or y5 > y6) : 
         return False
-    return True  
+
+    if image:
+        return True
+    else:
+        intersection_area=(x6-x5)*(y6-y5)
+        point1_area=(x2-x1)*(y2-y1)
+        point2_area=(x4-x3)*(y4-y3)
+
+        if intersection_area/point1_area > 0.55 and intersection_area/point2_area > 0.55:
+            return True
+        else:
+            return False  
 
 """[Rejects overlapping boundin boxes]
 """
@@ -666,7 +716,7 @@ def main(input_file_path):
                     #For detected objects
                     for i in range(r):
                       
-                      if scores[i]*100>=80.0:
+                      if scores[i]*100>=85.0:
                         object_json=dict().fromkeys(['object','xmin','ymin','xmax','ymax'],'')
                         if str(classes[i])=="1":
                             object_json['object']="textbox"         
@@ -685,6 +735,7 @@ def main(input_file_path):
                         object_json['xmax']=str(xmax)
                         object_json['ymax']=str(ymax)
                         object_json['coords']=','.join([str(xmin),str(ymin),str(xmax),str(ymax)])
+                        object_json['score']=scores[i]
                         all_coords.append(object_json['coords'])
                         detected_coords.append((xmin,ymin,xmax,ymax))
                         object_json['text']=get_text(image_pillow,((xmin, ymin, xmax,ymax )))
@@ -694,6 +745,23 @@ def main(input_file_path):
                             object_json["horizontal_alignment"]=get_alignment(image_pillow,float(xmin),float(xmax))
                             object_json['color']=get_colors(image_pillow,((xmin, ymin, xmax,ymax )))
                         json_object['objects'].append(object_json)
+                    
+                    
+
+                    
+                    for i in range(len(json_object['objects'])):
+                        for j in range(i+1,len(json_object['objects'])):
+                          if i<len(json_object['objects']) and j<len(json_object['objects']):
+                            coordsi=json_object['objects'][i].get('coords')
+                            coordsj=json_object['objects'][j].get('coords')
+                            box1=[float(c) for c  in coordsi.split(",")]
+                            box2=[float(c) for c  in coordsj.split(",")]
+                            intersection=FindPoints(box1[0],box1[1],box1[2],box1[3],box2[0],box2[1],box2[2],box2[3])
+                            if intersection:
+                                if json_object['objects'][i].get('score')>json_object['objects'][j].get('score'):
+                                    del json_object['objects'][j]
+                                else:
+                                    del json_object['objects'][i]
                     
                     #For image objects
                     images,image_coords=image_detection(image_np,detected_coords,image_pillow1)
@@ -722,10 +790,10 @@ def main(input_file_path):
                         category_index,
                         instance_masks=output_dict.get('detection_masks'),
                         use_normalized_coordinates=True,
-                        line_thickness=2,
+                        line_thickness=1,
                         skip_scores=True,
                         skip_labels=True,
-                        min_score_thresh=0.8
+                        min_score_thresh=0.85
                         )
 
                     return_dict["image"]=base64.b64encode(cv2.imencode('predicted.jpg', image_np)[1]).decode("utf-8")
