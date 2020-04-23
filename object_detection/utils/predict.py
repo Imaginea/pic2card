@@ -27,8 +27,8 @@ import requests
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
-#sys.path.append("/home/vasanth/mystique/models/research")
-sys.path.append("/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/models/research")
+sys.path.append("/home/vasanth/mystique/models/research")
+#sys.path.append("/home/keerthanamanoharan/Documents/office_work/Pic2Code/mystique/models/research")
 from object_detection.utils import ops as utils_ops
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
@@ -153,9 +153,10 @@ def image_detection(img,detected_coords,img_pillow):
     #=image_points[:-1]
     width,height=img_pillow.size
     widths=[point[2]-point[0] for point in image_points]
-    position=widths.index(max(widths))
-    if max(widths)-width <=10:
-        del image_points[position]
+    if widths:
+        position=widths.index(max(widths))
+        if max(widths)-width <=10:
+            del image_points[position]
 
     return image_crop_get_url(image_points,img_pillow),image_points
     
@@ -501,6 +502,7 @@ Returns:
 def get_text(image, coords):
     coords=(coords[0],coords[1],coords[2],coords[3])
     cropped_image = image.crop(coords)
+    cropped_image = cropped_image.convert('LA')
 
     data = pytesseract.image_to_string(cropped_image, lang='eng',config='--psm 6')
     return data
