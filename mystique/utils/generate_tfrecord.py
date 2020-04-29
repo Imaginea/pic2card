@@ -35,25 +35,29 @@ def class_text_to_int(row_label):
         return 2
     if row_label == 'checkbox':
         return 3
+    if row_label == 'image':
+        return 4
     else:
-        None
+        return 0
 
 
 def split(df, group):
     data = namedtuple('data', ['filename', 'object'])
     gb = df.groupby(group)
-    return [data(filename, gb.get_group(x)) for filename, x in zip(gb.groups.keys(), gb.groups)]
+    return [data(filename, gb.get_group(x))
+            for filename, x in zip(gb.groups.keys(), gb.groups)]
 
 
 def create_tf_example(group, path):
-    with tf.gfile.GFile(os.path.join(path, '{}'.format(group.filename)), 'rb') as fid:
+    name_filename = group.filename[:group.filename.find('.')] + ".png"
+    with tf.gfile.GFile(os.path.join(path, '{}'.format(name_filename)), 'rb') as fid:
         encoded_jpg = fid.read()
     encoded_jpg_io = io.BytesIO(encoded_jpg)
     image = Image.open(encoded_jpg_io)
     width, height = image.size
 
     filename = group.filename.encode('utf8')
-    image_format = b'jpg'
+    image_format = b'png'
     xmins = []
     xmaxs = []
     ymins = []
