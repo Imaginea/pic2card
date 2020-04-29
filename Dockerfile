@@ -2,7 +2,8 @@ FROM python:3.6.9
 
 RUN python --version
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip && \
+    apt-get update && apt-get install -y tesseract-ocr
 
 WORKDIR /mystique_app
 
