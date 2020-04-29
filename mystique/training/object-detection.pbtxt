@@ -4,13 +4,9 @@ item {
 }
 item {
     id: 2
-    name: 'radio_button'
+    name: 'radiobutton'
 }
 item {
     id: 3
     name: 'checkbox'
-}
-item {
-    id: 4
-    name: 'image'
 }
