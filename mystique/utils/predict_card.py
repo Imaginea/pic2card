@@ -94,13 +94,14 @@ class PredictCard:
         # Detect image coordinates inside the card design
         image_points = ImageExtraction().detect_image(
             image=image_np, detected_coords=detected_coords, pil_image=pil_image)
-        image_urls = ImageExtraction().image_crop_get_url(
+        image_urls,image_sizes = ImageExtraction().image_crop_get_url(
             coords=image_points, image=pil_image)
 
         # Arrange the design elements
         CardArrange().remove_overlapping_objects(json_object=json_objects)
         CardArrange().append_image_objects(
             image_urls=image_urls,
+            image_sizes=image_sizes,
             image_coords=image_points,
             pil_image=pil_image,
             json_object=json_objects)

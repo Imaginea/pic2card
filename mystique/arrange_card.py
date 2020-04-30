@@ -32,6 +32,7 @@ class CardArrange:
     def append_image_objects(
             self,
             image_urls=None,
+            image_sizes=None,
             image_coords=None,
             pil_image=None,
             json_object=None):
@@ -39,6 +40,7 @@ class CardArrange:
 
         Keyword Arguments:
             image_urls {[list]} -- [list of image urls] (default: {None})
+            image_sizes {[list]} -- [list of image sizes] (default: {None})
             image_coords {[list]} -- [list of image points] (default: {None})
             pil_image {[PIL image]} -- [Input image] (default: {None})
             json_object {[list]} -- [list of dicts] (default: {None})
@@ -54,6 +56,8 @@ class CardArrange:
             object_json["horizontal_alignment"] = ExtractProperties().get_alignment(
                 image=pil_image, xmin=float(coords[0]), xmax=float(coords[2]))
             object_json["url"] = im
+            object_json['sizes'] = ExtractProperties().get_image_size(
+                image=pil_image, image_cropped_size=image_sizes[ctr])
             object_json['xmin'] = coords[0]
             object_json['ymin'] = coords[1]
             object_json['xmax'] = coords[2]
@@ -219,11 +223,16 @@ class CardArrange:
             is_column {[booelean]} -- [boolean to determine object is part of columnset or not] (default: {None})
         """
         if object.get('object') == "image":
+            if is_column:
+                size = object.get('sizes')[0]
+            else:
+                size = object.get('sizes')[1]
             body.append({
                 "type": "Image",
                 "altText": "Image",
                 "horizontalAlignment": object.get('horizontal_alignment', ''),
-                "url": object.get('url'),
+                "size": size,
+                "url": object.get('url')
             })
             if ymins is not None:
                 ymins.append(object.get('ymin'))
@@ -239,7 +248,7 @@ class CardArrange:
                                     'size', ''), "horizontalAlignment": object.get(
                                     'horizontal_alignment', ''), "color": object.get(
                                     'color', 'Default'), "weight": object.get(
-                                    'weight', ''), }]})
+                                    'weight', '')}]})
                 if ymins is not None:
                     ymins.append(object.get('ymin'))
             else:
@@ -249,7 +258,7 @@ class CardArrange:
                     "size": object.get('size', ''),
                     "horizontalAlignment": object.get('horizontal_alignment', ''),
                     "color": object.get('color', 'Default'),
-                    "weight": object.get('weight', ''),
+                    "weight": object.get('weight', '')
                 })
                 if ymins is not None:
                     ymins.append(object.get('ymin'))
@@ -283,7 +292,7 @@ class CardArrange:
         for un in unique_ymin:
             l = []
             for xx in objects:
-                if abs(float(xx.get('ymin')) - float(un)) <= 11.0:
+                if abs(float(xx.get('ymin')) - float(un)) <= 10.0:
                     flag = 0
                     for gr in groups:
                         if xx in gr:

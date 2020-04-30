@@ -128,10 +128,13 @@ class ImageExtraction:
 
         Returns:
             [list] -- [list of image urls]
+            [list] -- [list of image sizes]
         """
-        images = []
+        images_urls = []
+        images_sizes = []
         for coords in coords:
             cropped = image.crop((coords[0], coords[1], coords[2], coords[3]))
+            images_sizes.append(cropped.size)
             cropped.save("image_detected.png")
             img = open("image_detected.png", "rb").read()
             base64_string = base64.b64encode(img).decode()
@@ -144,9 +147,9 @@ class ImageExtraction:
                 ('fileupload', open('image_detected.png', 'rb'))
             ]
             response = requests.request("POST", url, data=payload, files=files)
-            images.append(response.json().get(
+            images_urls.append(response.json().get(
                 "links", {}).get("image_link", ''))
-            # images.append("")
+            # images_urls.append("")
         if os.path.exists('image_detected.png'):
             os.remove('image_detected.png')
-        return images
+        return images_urls, images_sizes
