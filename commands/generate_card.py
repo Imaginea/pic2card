@@ -1,4 +1,11 @@
-"""Command to predict the adaptive card json"""
+"""
+Command to predict the adaptive card json
+
+Usage :
+python generate_card.py --image_path=/path/to/input/image
+                        --frozen_graph_path=model/frozen_inference_graph.pb
+                        --labels_path=mystique/training/object-detection.pbtxt
+"""
 import argparse
 import sys
 import os
@@ -14,15 +21,16 @@ sys.path.append (os.getcwd () + "/mystique/utils")
 
 def main (image_path=None, frozen_graph_path=None, labels_path=None):
 
-    """[Command runs the predict card function]
-
-    Keyword Arguments:
-        image_path {[string]} -- [input image] (default: {None})
-        frozen_graph_path {[string]} -- [trained model path] (default: {None})
-        labels_path {[string]} -- [labels path] (default: {None})
     """
-    card_json = PredictCard ().main (image_path=image_path,
-                                     frozen_graph_path=frozen_graph_path, labels_path=labels_path)
+    Command runs the predict card function
+
+    @param image_path: input image path
+    @param frozen_graph_path: path to frozen graph
+    @param labels_path: path to labels mapping
+    """
+    card_json = PredictCard (image_path=image_path,
+                            frozen_graph_path=frozen_graph_path, 
+                            labels_path=labels_path).main ()
     print (json.dumps (json.loads (card_json).get ('card_json'), indent=2))
 
 

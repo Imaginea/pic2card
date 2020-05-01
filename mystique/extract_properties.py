@@ -1,4 +1,4 @@
-"""[Module for extracting design element's properties]"""
+"""Module for extracting design element's properties"""
 
 from pytesseract import pytesseract
 import cv2
@@ -9,31 +9,34 @@ import math
 class ExtractProperties:
 
     def get_text(self, image=None, coords=None):
-        """[OCR to get the text of the detected coords]
 
-        Arguments:
-            image {[PIL image]} --  [input image] (default: {None})
-            coords {[list of tuple]} -- [coordinates from which text should be extracted] (default: {None})
+        """
+        Extract the text from the object coordinates 
+        in the input deisgn image using pytesseract.
 
-        Returns:
-            [String] -- [OCR Text]
+        @param image: input PIL image
+        @param coords: tuple of coordinates from which 
+                       text should be extracted
+        @return: ocr text
         """
         coords = (coords[0] - 5, coords[1], coords[2] + 5, coords[3])
         cropped_image = image.crop(coords)
-        cropped_image = cropped_image.convert('LA')
+        cropped_image = cropped_image.convert("LA")
 
         return pytesseract.image_to_string(
-            cropped_image, lang='eng', config='--psm 6')
+            cropped_image, lang="eng", config="--psm 6")
 
     def get_size_and_weight(self, image=None, coords=None):
-        """[Returns the size and weight properites of an object]
+        
+        """
+        Extract the size and weight of textual contents from
+        the input image by taking an average of each edge 
+        countour's of height and width of each character.
 
-        Arguments:
-            image {[PIL image]} -- [input image] (default: {None})
-            coords {[list of tuple]} -- [coordinates from which text size and weight should be extracted] (default: {None})
-
-        Returns:
-            [String,String] -- [size,weight]
+        @param image : input PIL image
+        @param coords: list of coordinated from which 
+                       text and height should be extracted
+        @return: size and weight
         """
         cropped_image = image.crop(coords)
         img = np.array(cropped_image)
@@ -58,13 +61,13 @@ class ExtractProperties:
 
         weights = sum(box_width) / len(box_width)
         heights = sum(box_height) / len(box_height)
-        size = 'Default'
-        weight = 'Default'
+        size = "Default"
+        weight = "Default"
 
         if heights <= 5.5:
-            size = 'Small'
+            size = "Small"
         elif 5.5 < heights <= 7:
-            size = 'Default'
+            size = "Default"
         elif 7 < heights <= 15:
             size = "Medium"
         elif 15 < heights <= 20:
@@ -84,15 +87,16 @@ class ExtractProperties:
         return size, weight
 
     def get_alignment(self, image=None, xmin=None, xmax=None):
-        """[Return the horizontal alignment of the object]
 
-        Keyword Arguments:
-            image {[PIL image]} -- [Input image] (default: {None})
-            xmin {[float]} -- [xmin of the object detected] (default: {None})
-            xmax {[float]} -- [xmax of the object detected] (default: {None})
+        """
+        Get the horizontal alignment of the elements by defining a
+        thresold based on the xmin and xmax of each object.
 
-        Returns:
-            [String] -- [Left|Right|Center]
+        @param image: input PIL image
+        @param xmin: xmin of the object detected
+        @param xmax: xmax of the object detected
+
+        @return: position string[ Left/Right/Center]
         """
 
         avg = math.ceil((xmin + xmax) / 2)
@@ -105,14 +109,17 @@ class ExtractProperties:
             return "Right"
 
     def get_colors(self, image=None, coords=None):
-        """[Returns the text color of the object [ mainly textboxes]]
 
-        Keyword Arguments:
-            image {[PIL image]} -- [Input image] (default: {None})
-            coords {[list of tuple]} -- [Coordinates from which color needs to be extracted] (default: {None})
+        """
+        EXtract the text color by quantaizing the image i.e
+        [cropped to the coordiantes] into 2 colors mainly
+        background and foreground and find the closest matching
+        foreground color.
 
-        Returns:
-            [String] -- [Color name]
+        @param image: input PIL image
+        @param coords: coordinates from which color needs to be extracted
+
+        @return: foreground color name
         """
         cropped_image = image.crop(coords)
         # get 2 dominant colors
@@ -120,14 +127,19 @@ class ExtractProperties:
         dominant_color = q.getpalette()[3:6]
 
         colors = {
-            "Attention": [(255, 0, 0), (180, 8, 0), (220, 54, 45), (194, 25, 18), (143, 7, 0)],
-            "Accent": [(0, 0, 255), (7, 47, 95), (18, 97, 160), (56, 149, 211)],
-            "Good": [(0, 128, 0), (145, 255, 0), (30, 86, 49), (164, 222, 2), (118, 186, 27), (76, 154, 42), (104, 187, 89)],
-            "Dark": [(0, 0, 0), (76, 76, 76), (51, 51, 51), (102, 102, 102), (153, 153, 153)],
+            "Attention": [(255, 0, 0), (180, 8, 0), 
+                         (220, 54, 45), (194, 25, 18), (143, 7, 0)],
+            "Accent": [(0, 0, 255), (7, 47, 95), 
+                      (18, 97, 160), (56, 149, 211)],
+            "Good": [(0, 128, 0), (145, 255, 0), (30, 86, 49), (164, 222, 2), 
+                    (118, 186, 27), (76, 154, 42), (104, 187, 89)],
+            "Dark": [(0, 0, 0), (76, 76, 76), (51, 51, 51),
+                    (102, 102, 102), (153, 153, 153)],
             "Light": [(255, 255, 255)],
-            "Warning": [(255, 255, 0), (255, 170, 0), (184, 134, 11), (218, 165, 32), (234, 186, 61), (234, 162, 33)]
+            "Warning": [(255, 255, 0), (255, 170, 0), (184, 134, 11), 
+                       (218, 165, 32), (234, 186, 61), (234, 162, 33)]
         }
-        color = 'Default'
+        color = "Default"
         found_colors = []
         distances = []
         # find the dominant text colors based on the RGB difference
@@ -152,5 +164,5 @@ class ExtractProperties:
                         (np.asarray(background) -
                          np.asarray(foreground)) ** 2))
                 if distance < 150:
-                    color = 'Default'
+                    color = "Default"
         return color

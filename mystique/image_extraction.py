@@ -1,4 +1,4 @@
-"""[Module for image extraction inside the card design"""
+"""Module for image extraction inside the card design"""
 import cv2
 import numpy as np
 import base64
@@ -8,17 +8,21 @@ import os
 
 class ImageExtraction:
 
-    def find_points(self, coord1, coord2, for_image=None):    
-        """[Finds the intersecting bounding boxes]
+    def find_points(self, coord1, coord2, for_image=None):
 
-        Arguments:
-            coord1 {[tuple]} -- [Coordinates of rectange]
-            coord2 {[tuple]} -- [Coordinates of rectange]
-        Keyword Arguments:
-            for_image {[Boolean]} -- [Is intersection is deterined for image] (default: {None})
+        """
+        Finds the intersecting bounding boxes by finding
+           the highest x and y ranges of the 2 coordinates 
+           and determine the intersection by deciding weather 
+           the new xmin>xmax or the new ymin>ymax.
+           For non image objects, includes finding the intersection 
+           area to a thersold to determine intersection
 
-        Returns:
-            [Boolean] -- [True/False]
+        @param coord1: list of coordinates of 1st object
+        @param coord2: list of coordinates of 2nd object
+        @param for_image: boolean to differentiate non image
+                          objects
+        @return: True/False
         """
         x5 = max(coord1[0], coord2[0])
         y5 = max(coord1[1], coord2[1])
@@ -34,22 +38,25 @@ class ImageExtraction:
             intersection_area = (x6 - x5) * (y6 - y5)
             point1_area = (coord1[2] - coord1[0]) * (coord1[3] - coord1[1])
             point2_area = (coord2[2] - coord2[0]) * (coord2[3] - coord2[1])
-            if intersection_area / point1_area > 0.55 or intersection_area / point2_area > 0.55:
-
+            if intersection_area / point1_area > 0.55 or \
+                intersection_area / point2_area > 0.55:
                 return True
             else:
                 return False
 
     def detect_image(self, image=None, detected_coords=None, pil_image=None):
-        """[Returns the Detected image coordinates]
 
-        Keyword Arguments:
-            image {[open-cv]} -- [input opencv image] (default: {None})
-            detected_coords {[list of tuple]} -- [list of detected object's coordinates from faster rcnn model] (default: {None})
-            pil_image {[pil_image]} -- [PIL input image] (default: {None})
+        """
+        Returns the Detected image coordinates by buidling 
+        countours over the design edge detection and on removing
+        the faster rcnn model detected obects.
 
-        Returns:
-            [list] -- [image points]
+        @param image: input open-cv image
+        @param detected_coords: list of detected 
+                                   object's coordinates from faster rcnn model
+        @param pil_image: Input PIL image
+
+        @return: list of image points
         """
         image_points = []
         # pre processing
@@ -120,14 +127,15 @@ class ImageExtraction:
         return image_points
 
     def image_crop_get_url(self, coords=None, image=None):
-        """[Returns the Image urls]
 
-        Arguments:
-            coords {[list]} -- [image points] (default: {None})
-            image {[pil image]} -- [input image] (default: {None})
+        """
+        Crops the individual image objects from the input
+        design and get the hosted url of the images.
 
-        Returns:
-            [list] -- [list of image urls]
+        @param coords: list of image points
+        @param image: input PIL image
+
+        @return: list of image urls.
         """
         images = []
         for coords in coords:
@@ -136,17 +144,17 @@ class ImageExtraction:
             img = open("image_detected.png", "rb").read()
             base64_string = base64.b64encode(img).decode()
             url = "https://post.imageshack.us/upload_api.php"
-            payload = {'key': '0346ANQUe74917fd7160ababf178d69779a76c7c',
-                       'format': 'json',
-                       'tags': 'sample',
-                       'public': 'yes'}
+            payload = {"key": "0346ANQUe74917fd7160ababf178d69779a76c7c",
+                       "format": "json",
+                       "tags": "sample",
+                       "public": "yes"}
             files = [
-                ('fileupload', open('image_detected.png', 'rb'))
+                ("fileupload", open("image_detected.png", "rb"))
             ]
             response = requests.request("POST", url, data=payload, files=files)
             images.append(response.json().get(
-                "links", {}).get("image_link", ''))
+                "links", {}).get("image_link", ""))
             # images.append("")
-        if os.path.exists('image_detected.png'):
-            os.remove('image_detected.png')
+        if os.path.exists("image_detected.png"):
+            os.remove("image_detected.png")
         return images
