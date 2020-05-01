@@ -44,7 +44,7 @@ class ImageExtraction:
             else:
                 return False
 
-    def detect_image(self, image=None, detected_coords=None, pil_image=None):
+    def detect_image(self, image=None , detected_coords=None, pil_image=None):
 
         """
         Returns the Detected image coordinates by buidling 

@@ -31,8 +31,8 @@ class CardArrange:
                         else:
                             del json_object["objects"][i]
 
-    def append_image_objects(self,image_urls=None,image_coords=None,
-                             pil_image=None,json_object=None):
+    def append_image_objects(self, image_urls=None, image_coords=None,
+                             pil_image=None, json_object=None):
 
         """
         Appends the extracted image objects to the list of design objects 
@@ -83,14 +83,14 @@ class CardArrange:
         for un in unique_ymin:
             temp_list = []
             for xx in image_objects:
-                if abs (float (xx.get ("ymin")) - float (un)) <= 10.0:
+                if abs(float(xx.get ("ymin")) - float(un)) <= 10.0:
                     temp_list.append (xx)
             if temp_list not in groups:
                 groups.append (temp_list)
         # now put similar ymin grouped objects into a imageset - if a group has
         # more than one image object
         for group in groups:
-            group = sorted (group, key=lambda i: i["xmin"])
+            group = sorted(group, key=lambda i: i["xmin"])
             if len (group) > 1:
                 image_set = {
                     "type": "ImageSet",
@@ -99,16 +99,16 @@ class CardArrange:
                     }
                 for design_object in group:
                     if design_object in objects:
-                        del objects[objects.index (design_object)]
+                        del objects[objects.index(design_object)]
                     obj = {
                         "type": "Image",
                         "altText": "Image",
-                        "horizontalAlignment": design_object.get ("horizontal_alignment",""),
+                        "horizontalAlignment": design_object.get("horizontal_alignment",""),
                         "url": design_object.get ("url"),
                         }
-                    image_set["images"].append (obj)
-                body.append (image_set)
-                ymins.append (design_object.get ("ymin"))
+                    image_set["images"].append(obj)
+                body.append(image_set)
+                ymins.append(design_object.get("ymin"))
 
     def return_position(self, groups, obj):
 
@@ -154,7 +154,7 @@ class CardArrange:
                     j not in positions_grouped:
                     if i in positions_grouped:
                         position = self.return_position(groups, radiobutons[i])
-                        if len (groups) > position >= 0:
+                        if len(groups) > position >= 0:
                             groups[position].append(radiobutons[j])
                             positions_grouped.append (j)
                         elif radiobutons[i] in temp_list:
@@ -189,8 +189,8 @@ class CardArrange:
                     })
 
             body.append(choice_set)
-            if ymins is not None and len (group) > 0:
-                ymins.append (obj.get ("ymin"))
+            if ymins is not None and len(group) > 0:
+                ymins.append(obj.get("ymin"))
 
     def append_objects(self, design_object, body, ymins=None, is_column=None):
 
@@ -204,16 +204,16 @@ class CardArrange:
                           a column element
         """
         if design_object.get("object") == "image":
-            body.append ({
+            body.append({
                 "type": "Image",
                 "altText": "Image",
                 "horizontalAlignment": design_object.get("horizontal_alignment", ""),
                 "url": design_object.get("url"),
                 })
             if ymins is not None:
-                ymins.append (design_object.get ("ymin"))
-        if design_object.get ("object") == "textbox":
-            if (len (design_object.get("text", "").split ()) >= 11 and not is_column) or (
+                ymins.append(design_object.get("ymin"))
+        if design_object.get("object") == "textbox":
+            if (len(design_object.get("text", "").split()) >= 11 and not is_column) or (
                     is_column and len(design_object.get ("text", "")) >= 15):
                 body.append ({
                     "type": "RichTextBlock",

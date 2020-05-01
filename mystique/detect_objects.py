@@ -10,22 +10,16 @@ from PIL import Image
 from object_detection.utils import label_map_util
 from object_detection.utils import ops as utils_ops
 
-if StrictVersion (tf.__version__) < StrictVersion ("1.9.0"):
-    raise ImportError (
-            "Please upgrade your TensorFlow installation to v1.9.* or later!")
+if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
+    raise ImportError(
+        "Please upgrade your TensorFlow installation to v1.9.* or later!")
 
 
 class ObjectDetection:
-    model_name = None
-    path_to_frozen_graph = None
-    path_to_labels = None
 
-    def __init__ (self,path_to_frozen_graph=path_to_frozen_graph,path_to_labels=path_to_labels):
-        self.path_to_frozen_graph = path_to_frozen_graph
-        self.path_to_labels = path_to_labels
-
-    def get_objects(self, image_path=None):
-
+    
+    def get_objects(self, image_path=None, path_to_frozen_graph=None, path_to_label=None):
+        
         """
         Returns the objects and coordiates detected 
         from the faster rcnn detected boxes]
@@ -34,22 +28,22 @@ class ObjectDetection:
 
         @return: ouput dict from the faster rcnn inference
         """
-        detection_graph = tf.Graph ()
-        with detection_graph.as_default ():
-            od_graph_def = tf.GraphDef ()
-            with tf.gfile.GFile (self.path_to_frozen_graph, "rb") as fid:
-                serialized_graph = fid.read ()
-                od_graph_def.ParseFromString (serialized_graph)
-                tf.import_graph_def (od_graph_def, name="")
-        category_index = label_map_util.create_category_index_from_labelmap (
-                self.path_to_labels, use_display_name=True)
+        detection_graph = tf.Graph()
+        with detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(path_to_frozen_graph, "rb") as fid:
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name="")
+        category_index = label_map_util.create_category_index_from_labelmap(
+            path_to_label, use_display_name=True)
 
-        with detection_graph.as_default ():
-            with tf.Session () as sess:
+        with detection_graph.as_default():
+            with tf.Session() as sess:
                 # Get handles to input and output tensors
-                ops = tf.get_default_graph ().get_operations ()
+                ops = tf.get_default_graph().get_operations()
                 all_tensor_names = {
-                        output.name for op in ops for output in op.outputs}
+                    output.name for op in ops for output in op.outputs}
 
                 tensor_dict = {}
                 for key in [
@@ -58,22 +52,22 @@ class ObjectDetection:
                 ]:
                     tensor_name = key + ":0"
                     if tensor_name in all_tensor_names:
-                        tensor_dict[key] = tf.get_default_graph (
-                        ).get_tensor_by_name (tensor_name)
+                        tensor_dict[key] = tf.get_default_graph(
+                        ).get_tensor_by_name(tensor_name)
                 test_image_path = image_path
                 if ".png" in test_image_path or \
-                    ".jpeg" in test_image_path or ".jpg" in test_image_path:
+                        ".jpeg" in test_image_path or ".jpg" in test_image_path:
                     images = [test_image_path]
                 else:
-                    images = os.listdir (test_image_path)
+                    images = os.listdir(test_image_path)
                 for image in images:
-                    if image.find (".png") != -1 or image.find (".jpg") != - \
-                            1 or image.find (".jpeg") != -1:
+                    if image.find(".png") != -1 or image.find(".jpg") != - \
+                            1 or image.find(".jpeg") != -1:
                         img_path = test_image_path
-                        image_pillow = Image.open (img_path)
-                        image_np = cv2.imread (img_path)
-                        output_dict = self.run_inference_for_single_image (
-                                image_np, detection_graph, tensor_dict, sess)
+                        image_pillow = Image.open(img_path)
+                        image_np = cv2.imread(img_path)
+                        output_dict = self.run_inference_for_single_image(
+                            image_np, detection_graph, tensor_dict, sess)
                         return output_dict, category_index
 
     def run_inference_for_single_image(self, image, graph, tensor_dict, sess):

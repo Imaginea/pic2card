@@ -17,12 +17,8 @@ sys.path.append(os.getcwd())
 
 class PredictCard:
 
-    def __init__ (self,labels_path=None,frozen_graph_path=None,image_path=None):
-        self.labels_path = labels_path
-        self.forzen_graph_path = frozen_graph_path
-        self.image_path = image_path
-
-    def collect_objects(self, output_dict=None):
+    
+    def collect_objects(self, output_dict=None, image_path=None):
 
         """
         Returns the design elements from the faster rcnn model with its 
@@ -39,7 +35,7 @@ class PredictCard:
         r, c = boxes.shape
         detected_coords = []
         json_object = {}.fromkeys(["objects"], [])
-        pil_image = Image.open(self.image_path)
+        pil_image = Image.open(image_path)
         width, height = pil_image.size
         for i in range(r):
             if scores[i] * 100 >= 90.0:
@@ -82,19 +78,17 @@ class PredictCard:
                 json_object["objects"].append(object_json)
         return json_object, detected_coords
 
-    def main(self):
+    def main(self, labels_path=None, frozen_graph_path=None, image_path=None):
         
-        image_np = cv2.imread(self.image_path)
-        pil_image = Image.open(self.image_path)
+        image_np = cv2.imread(image_path)
+        pil_image = Image.open(image_path)
         # Extract the design objects from faster rcnn model
-        obj = ObjectDetection(
-            path_to_frozen_graph=self.forzen_graph_path,
-            path_to_labels=self.labels_path)
-        output_dict, category_index = obj.get_objects(
-            image_path=self.image_path)
+        output_dict, category_index = ObjectDetection().get_objects(image_path=image_path,
+            path_to_frozen_graph=frozen_graph_path, 
+            path_to_label=labels_path)
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
-            output_dict=output_dict)
+            output_dict=output_dict, image_path=image_path)
         # Detect image coordinates inside the card design
         image_points = ImageExtraction().detect_image(
             image=image_np, detected_coords=detected_coords, pil_image=pil_image)
