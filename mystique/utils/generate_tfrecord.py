@@ -7,18 +7,18 @@ Usage:
   # Create test data:
   python generate_tfrecord.py --csv_input=data/test_labels.csv  --output_path=test.record
 """
+from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import absolute_import
 
-import os
 import io
+import os
+from collections import namedtuple
+
 import pandas as pd
 import tensorflow as tf
-
 from PIL import Image
 from object_detection.utils import dataset_util
-from collections import namedtuple, OrderedDict
 
 flags = tf.app.flags
 flags.DEFINE_string('csv_input', '', 'Path to the CSV input')

@@ -1,22 +1,26 @@
 """Module to  get the predicted adaptive card json"""
 
-import argparse
-import sys
-from PIL import Image
+import json
 import os
 import sys
-sys.path.append(os.getcwd())
+
+import cv2
+from PIL import Image
+
+from mystique.arrange_card import CardArrange
 from mystique.detect_objects import ObjectDetection
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
-from mystique.arrange_card import CardArrange
-from object_detection.utils import visualization_utils as vis_util
-import cv2
-import base64
-import json
+
+sys.path.append(os.getcwd())
 
 
 class PredictCard:
+
+    def __init__ (self,labels_path=None,frozen_graph_path=None,image_path=None):
+        self.labels_path = labels_path
+        self.forzen_graph_path = frozen_graph_path
+        self.image_path = image_path
 
     def collect_objects(self, output_dict=None):
         """[Returns the design elements from the faster rcnn model with its properties]
@@ -52,34 +56,29 @@ class PredictCard:
                 ymax = boxes[i][2] * height
                 xmax = boxes[i][3] * width
 
-                object_json['xmin'] = str(xmin)
-                object_json['ymin'] = str(ymin)
-                object_json['xmax'] = str(xmax)
-                object_json['ymax'] = str(ymax)
-                object_json['coords'] = ','.join(
-                    [str(xmin), str(ymin), str(xmax), str(ymax)])
+                object_json['xmin'] = float(xmin)
+                object_json['ymin'] = float(ymin)
+                object_json['xmax'] = float(xmax)
+                object_json['ymax'] = float(ymax)
+                object_json['coords'] = ','.join([str(xmin), str(ymin), str(xmax), str(ymax)])
                 object_json['score'] = scores[i]
                 if object_json['object'] == 'textbox':
                     detected_coords.append((xmin - 5, ymin, xmax + 5, ymax))
                 else:
                     detected_coords.append((xmin, ymin, xmax, ymax))
                 object_json['text'] = ExtractProperties().get_text(
-                    image=pil_image, coords=((xmin, ymin, xmax, ymax)))
+                    image=pil_image, coords=(xmin, ymin, xmax, ymax))
                 if object_json['object'] == "textbox":
                     object_json["size"], object_json['weight'] = ExtractProperties(
-                    ).get_size_and_weight(image=pil_image, coords=((xmin, ymin, xmax, ymax)))
+                    ).get_size_and_weight(image=pil_image, coords=(xmin, ymin, xmax, ymax))
                     object_json["horizontal_alignment"] = ExtractProperties().get_alignment(
                         image=pil_image, xmin=float(xmin), xmax=float(xmax))
                     object_json['color'] = ExtractProperties().get_colors(
-                        image=pil_image, coords=((xmin, ymin, xmax, ymax)))
+                        image=pil_image, coords=(xmin, ymin, xmax, ymax))
                 json_object['objects'].append(object_json)
         return json_object, detected_coords
 
-    def main(self, image_path=None, forzen_graph_path=None, labels_path=None):
-
-        self.image_path = image_path
-        self.forzen_graph_path = forzen_graph_path
-        self.labels_path = labels_path
+    def main(self):
         image_np = cv2.imread(self.image_path)
         pil_image = Image.open(self.image_path)
         # Extract the design objects from faster rcnn model
@@ -104,39 +103,13 @@ class PredictCard:
             image_coords=image_points,
             pil_image=pil_image,
             json_object=json_objects)
-        return_dict = {}.fromkeys(['image', 'card_json'], '')
-
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            image_np,
-            output_dict['detection_boxes'],
-            output_dict['detection_classes'],
-            output_dict['detection_scores'],
-            category_index,
-            instance_masks=output_dict.get('detection_masks'),
-            use_normalized_coordinates=True,
-            line_thickness=1,
-            skip_scores=True,
-            skip_labels=True,
-            min_score_thresh=0.9
-        )
-        return_dict["image"] = base64.b64encode(
-            cv2.imencode('predicted.jpg', image_np)[1]).decode("utf-8")
+        return_dict = {}.fromkeys(['card_json'], '')
         card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [
         ], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
         body, ymins = CardArrange().build_card_json(
             objects=json_objects.get('objects', []))
         # Sort the elements vertically
-        for obj in range(len(ymins) - 1, 0, -1):
-            for i in range(obj):
-                if i + 1 < len(ymins):
-                    if float(ymins[i]) > float(ymins[i + 1]):
-                        temp1 = ymins[i]
-                        temp = body[i]
-                        body[i] = body[i + 1]
-                        ymins[i] = ymins[i + 1]
-                        body[i + 1] = temp
-                        ymins[i + 1] = temp1
+        body = [x for _, x in sorted(zip(ymins, body))]
         card_json["body"] = body
         return_dict["card_json"] = card_json
         return json.dumps(return_dict)
-

@@ -1,12 +1,12 @@
-"""Flask service to predict the adaptove card json from the card design"""
+"""Flask service to predict the adaptive card json from the card design"""
 
-from flask import Flask, make_response, jsonify
-from flask import request
-from flask_restplus import Api
 import logging
-from resources import PredictJson
-from flask_cors import CORS
 from logging.handlers import RotatingFileHandler
+
+from flask import Flask
+from flask_cors import CORS
+from flask_restplus import Api
+from resources import PredictJson
 
 logger = logging.getLogger("mysitque")
 logger.setLevel(logging.DEBUG)

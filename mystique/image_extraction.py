@@ -8,7 +8,7 @@ import os
 
 class ImageExtraction:
 
-    def FindPoints(self, coord1, coord2, for_image=None):
+    def find_points(self, coord1, coord2, for_image=None):    
         """[Finds the intersecting bounding boxes]
 
         Arguments:
@@ -24,7 +24,7 @@ class ImageExtraction:
         y5 = max(coord1[1], coord2[1])
         x6 = min(coord1[2], coord2[2])
         y6 = min(coord1[3], coord2[3])
-        if (x5 > x6 or y5 > y6):
+        if x5 > x6 or y5 > y6:
             return False
 
         if for_image:
@@ -76,7 +76,7 @@ class ImageExtraction:
                 if j < len(image_points) and i < len(image_points):
                     box1 = [float(c) for c in image_points[i]]
                     box2 = [float(c) for c in image_points[j]]
-                    intersection = self.FindPoints(box1, box2, for_image=True)
+                    intersection = self.find_points(box1, box2, for_image=True)
                     contain = (
                         float(
                             box2[0]) <= box1[0] +

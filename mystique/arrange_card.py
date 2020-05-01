@@ -21,7 +21,7 @@ class CardArrange:
                     coordsj = json_object['objects'][j].get('coords')
                     box1 = [float(c) for c in coordsi.split(",")]
                     box2 = [float(c) for c in coordsj.split(",")]
-                    intersection = ImageExtraction().FindPoints(box1, box2)
+                    intersection = ImageExtraction().find_points(box1, box2)
                     if intersection:
                         if json_object['objects'][i].get(
                                 'score') > json_object['objects'][j].get('score'):
@@ -78,44 +78,37 @@ class CardArrange:
         # left_over_images=[]
         unique_ymin = list(set([x.get('ymin') for x in image_objects]))
         for un in unique_ymin:
-            l = []
+            temp_list = []
             for xx in image_objects:
-                if abs(float(xx.get('ymin')) - float(un)) <= 10.0:
-                    l.append(xx)
-            if l not in groups:
-                groups.append(l)
+                if abs (float (xx.get ('ymin')) - float (un)) <= 10.0:
+                    temp_list.append (xx)
+            if temp_list not in groups:
+                groups.append (temp_list)
         # now put similar ymin grouped objects into a imageset - if a group has
         # more than one image object
         for group in groups:
 
-            for obj in range(len(group) - 1, 0, -1):
-                for i in range(obj):
-                    if float(group[i].get('xmin')) > float(
-                            group[i + 1].get('xmin')):
-                        temp = group[i]
-                        group[i] = group[i + 1]
-                        group[i + 1] = temp
-
-            if len(group) > 1:
+            group = sorted (group, key=lambda i: i['xmin'])
+            if len (group) > 1:
                 image_set = {
-                    "type": "ImageSet",
-                    "imageSize": "medium",
-                    "images": []}
-                for object in group:
-                    if object in objects:
-                        del objects[objects.index(object)]
+                        "type": "ImageSet",
+                        "imageSize": "medium",
+                        "images": []}
+                for design_object in group:
+                    if design_object in objects:
+                        del objects[objects.index (design_object)]
                     obj = {
-                        "type": "Image",
-                        "altText": "Image",
-                        "horizontalAlignment": object.get(
-                            'horizontal_alignment',
-                            ''),
-                        "url": object.get('url'),
+                            "type": "Image",
+                            "altText": "Image",
+                            "horizontalAlignment": design_object.get (
+                                    'horizontal_alignment',
+                                    ''),
+                            "url": design_object.get ('url'),
                     }
-                    image_set['images'].append(obj)
+                    image_set['images'].append (obj)
 
-                body.append(image_set)
-                ymins.append(object.get('ymin'))
+                body.append (image_set)
+                ymins.append (design_object.get ('ymin'))
 
     def return_position(self, groups, obj):
         """[Returns the position of a object inside a group]
@@ -145,7 +138,7 @@ class CardArrange:
         groups = []
         positions_grouped = []
         for i in range(len(radiobutons)):
-            l = []
+            temp_list = []
             for j in range(len(radiobutons)):
                 a = float(radiobutons[i].get('ymin'))
                 b = float(radiobutons[j].get('ymin'))
@@ -159,37 +152,29 @@ class CardArrange:
                         difference) <= 10 and difference_in_ymin <= 30 and j not in positions_grouped:
                     if i in positions_grouped:
                         position = self.return_position(groups, radiobutons[i])
-                        if position < len(groups) and position >= 0:
+                        if len (groups) > position >= 0:
                             groups[position].append(radiobutons[j])
-                            positions_grouped.append(j)
-                        elif radiobutons[i] in l:
-                            l.append(radiobutons[j])
-                            positions_grouped.append(j)
+                            positions_grouped.append (j)
+                        elif radiobutons[i] in temp_list:
+                            temp_list.append(radiobutons[j])
+                            positions_grouped.append (j)
                     else:
-                        l = [radiobutons[i]]
-                        l.append(radiobutons[j])
+                        temp_list = [radiobutons[i], radiobutons[j]]
                         positions_grouped.append(j)
                         positions_grouped.append(i)
 
-            if l != []:
+            if temp_list:
                 flag = False
                 for gr in groups:
-                    for ll in l:
-                        if ll in gr:
+                    for temp in temp_list:
+                        if temp in gr:
                             flag = True
 
                 if not flag:
-                    groups.append(l)
+                    groups.append(temp_list)
 
         for group in groups:
-            for ob in range(len(group) - 1, 0, -1):
-                for i in range(ob):
-                    if float(group[i].get('ymin')) > float(
-                            group[i + 1].get('ymin')):
-                        temp = group[i]
-                        group[i] = group[i + 1]
-                        group[i + 1] = temp
-
+            group = sorted (group, key=lambda i: i['ymin'])
             choice_set = {
                 "type": "Input.ChoiceSet",
                 "choices": [],
@@ -200,70 +185,69 @@ class CardArrange:
                 choice_set['choices'].append({
                     "title": obj.get('text', ''),
                     "value": "",
-                    "score": str(obj.get('score', ''))
                 })
 
             body.append(choice_set)
-            if ymins is not None:
-                ymins.append(obj.get('ymin'))
+            if ymins is not None and len (group) > 0:
+                ymins.append (obj.get ('ymin'))
 
-    def append_objects(self, object, body, ymins=None, is_column=None):
+    def append_objects(self, design_object, body, ymins=None, is_column=None):
         """[Appends the individaul design elements to card body]
 
         Arguments:
-            object {[dict]} -- [object to append]
+            design_object {[dict]} -- [object to append]
             body {[list]} -- [card body]
 
         Keyword Arguments:
             ymins {[list]} -- [list of ymins] (default: {None})
-            is_column {[booelean]} -- [boolean to determine object is part of columnset or not] (default: {None})
+            is_column {[boolean]} -- [boolean to determine object is part of columnset or not] (default: {None})
         """
-        if object.get('object') == "image":
-            body.append({
-                "type": "Image",
-                "altText": "Image",
-                "horizontalAlignment": object.get('horizontal_alignment', ''),
-                "url": object.get('url'),
+        if design_object.get('object') == "image":
+            body.append ({
+                    "type": "Image",
+                    "altText": "Image",
+                    "horizontalAlignment": design_object.get('horizontal_alignment', ''),
+                    "url": design_object.get('url'),
             })
             if ymins is not None:
-                ymins.append(object.get('ymin'))
-        if object.get('object') == "textbox":
-            if (len(object.get('text', '').split()) >= 11 and not is_column) or (
-                    is_column and len(object.get('text', '')) >= 15):
-                body.append(
-                    {
-                        "type": "RichTextBlock", "inlines": [
-                            {
-                                "type": "TextRun", "text": object.get(
-                                    'text', ''), "size": object.get(
-                                    'size', ''), "horizontalAlignment": object.get(
-                                    'horizontal_alignment', ''), "color": object.get(
-                                    'color', 'Default'), "weight": object.get(
-                                    'weight', ''), }]})
+                ymins.append (design_object.get ('ymin'))
+        if design_object.get ('object') == "textbox":
+            if (len (design_object.get('text', '').split ()) >= 11 and not is_column) or (
+                    is_column and len(design_object.get ('text', '')) >= 15):
+                body.append (
+                        {
+                                "type": "RichTextBlock",
+                                "inlines": [{
+                                        "type": "TextRun", "text": design_object.get ("text", ""),
+                                        "size": design_object.get ("size", ""),
+                                        "horizontalAlignment": design_object.get ("horizontal_alignment", ""),
+                                        "color": design_object.get ("color", 'Default'),
+                                        "weight": design_object.get ("weight", "")
+                                }]})
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get ('ymin'))
             else:
                 body.append({
-                    "type": "TextBlock",
-                    "text": object.get('text', ''),
-                    "size": object.get('size', ''),
-                    "horizontalAlignment": object.get('horizontal_alignment', ''),
-                    "color": object.get('color', 'Default'),
-                    "weight": object.get('weight', ''),
+                        "type": "TextBlock",
+                        "text": design_object.get ('text', ''),
+                        "size": design_object.get ('size', ''),
+                        "horizontalAlignment": design_object.get ('horizontal_alignment', ''),
+                        "color": design_object.get ('color', 'Default'),
+                        "weight": design_object.get ('weight', ''),
                 })
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get ('ymin'))
 
-            if object.get('object') == "checkbox":
+            if design_object.get('object') == "checkbox":
                 body.append({
-                    "type": "Input.Toggle",
-                    "title": object.get('text', ''),
+                        "type": "Input.Toggle",
+                        "title": design_object.get ('text', ''),
                 })
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get ('ymin'))
 
-    def build_card_json(self, objects=None):
-        """[Builds the Adaptove card json]
+    def build_card_json (self, objects=None):
+        """[Builds the Adaptive card json]
 
         Keyword Arguments:
             objects {[list]} -- [list of objects] (default: {None})
@@ -274,14 +258,14 @@ class CardArrange:
         body = []
         ymins = []
         image_objects = []
-        for object in objects:
-            if object.get('object') == "image":
-                image_objects.append(object)
+        for design_object in objects:
+            if design_object.get ('object') == "image":
+                image_objects.append (design_object)
         self.group_image_objects(image_objects, body, ymins, objects)
         groups = []
-        unique_ymin = list(set([x.get('ymin') for x in objects]))
+        unique_ymin = list(set([x.get ('ymin') for x in objects]))
         for un in unique_ymin:
-            l = []
+            temp_list = []
             for xx in objects:
                 if abs(float(xx.get('ymin')) - float(un)) <= 11.0:
                     flag = 0
@@ -289,10 +273,10 @@ class CardArrange:
                         if xx in gr:
                             flag = 1
                     if flag == 0:
-                        l.append(xx)
+                        temp_list.append (xx)
 
-            if l not in groups:
-                groups.append(l)
+            if temp_list not in groups:
+                groups.append(temp_list)
 
         radio_buttons_dict = {"normal": []}
         for group in groups:
@@ -309,14 +293,7 @@ class CardArrange:
                     "columns": []}
                 ctr = 0
 
-                for obj in range(len(group) - 1, 0, -1):
-                    for i in range(obj):
-                        if float(group[i].get('xmin')) > float(
-                                group[i + 1].get('xmin')):
-                            temp = group[i]
-                            group[i] = group[i + 1]
-                            group[i + 1] = temp
-
+                group = sorted (group, key=lambda i: i['xmin'])
                 for obj in group:
 
                     colummn_set['columns'].append({

@@ -1,15 +1,13 @@
 """Module to Calculate Cosine similarity between the testing and generated card json"""
-from collections import Counter
+import argparse
+import base64
+import json
+import os
+import re
+
+import requests
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import json
-import re
-import requests
-import os
-import argparse
-import orca.scripts
-import base64
-from scipy.spatial.distance import cosine
 
 
 def build_generated_card_json(images, path, testing_file_path):
@@ -26,13 +24,11 @@ def build_generated_card_json(images, path, testing_file_path):
     for image in images:
         print(path+image)
         if image not in generated_images:
-            base64_string = ''
             with open(path+image, "rb") as image_file:
                 base64_string = base64.b64encode(image_file.read()).decode()
             response = requests.post('http://172.17.0.9:5050/predict_json', data=json.dumps(
                 {"image": base64_string}), headers={"Content-Type": "application/json"})
-            content = {"filename": str(image)}
-            content["card_json"] = response.json().get('card_json')
+            content = {"filename": str(image), "card_json": response.json().get('card_json')}
             generated_jsonlines_file.write(json.dumps(content))
             generated_jsonlines_file.write("\n")
 
@@ -114,7 +110,7 @@ def main(testing_file_path, testing_images_path):
             jaccard_similarities[filename] = str(
                 get_jaccard_sim(test_card_json, generated_card_json))
 
-            print("Cosiine Similarities:\n", json.dumps(
+            print("Cosine Similarities:\n", json.dumps(
                 cosine_similarities, indent=2))
             print("Average Cosine Similarity:", (sum([float(l) for l in list(
                 cosine_similarities.values())])/len(list(cosine_similarities.values())))*100)
@@ -129,10 +125,10 @@ def main(testing_file_path, testing_images_path):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Generate Objectss')
+    parser = argparse.ArgumentParser(description='Cosine Similarity')
     parser.add_argument('--testing_file_path', required=True,
                         help='Enter Test File Path')
     parser.add_argument('--testing_images_path', required=True,
                         help='Enter Test Images Folder Path')
     args = parser.parse_args()
-    main(args.image_path)
+    main(args.testing_file_path,args.testing_images_path)

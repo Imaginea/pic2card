@@ -42,7 +42,6 @@ class ExtractProperties:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.blur(gray, (5, 5))
         kernel = np.ones((5, 5), np.uint8)
-        closing = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
         # edge detection
         edged = cv2.Canny(img, 30, 200)
         # contours bulding
@@ -53,7 +52,6 @@ class ExtractProperties:
         # calculate the average width and height of the contour coords of the
         # object
         for c in contours:
-            rect = cv2.minAreaRect(c)
             (x, y, w, h) = cv2.boundingRect(c)
             box_width.append(w)
             box_height.append(h)
@@ -65,11 +63,11 @@ class ExtractProperties:
 
         if heights <= 5.5:
             size = 'Small'
-        elif heights > 5.5 and heights <= 7:
+        elif 5.5 < heights <= 7:
             size = 'Default'
-        elif heights > 7 and heights <= 15:
+        elif 7 < heights <= 15:
             size = "Medium"
-        elif heights > 15 and heights <= 20:
+        elif 15 < heights <= 20:
             size = "Large"
         else:
             size = "ExtraLarge"
@@ -79,7 +77,7 @@ class ExtractProperties:
         elif size == "Medium" and weights > 6.5:
             weight = "Bolder"
         elif size == "Large" and weights > 8:
-            weights = "Bolder"
+            weight = "Bolder"
         elif size == "ExtraLarge" and weights > 9:
             weight = "Bolder"
 
@@ -99,9 +97,9 @@ class ExtractProperties:
 
         avg = math.ceil((xmin + xmax) / 2)
         w, h = image.size
-        if (avg / w) * 100 >= 0 and (avg / w) * 100 < 45:
+        if 0 <= (avg / w) * 100 < 45:
             return "Left"
-        elif (avg / w) * 100 >= 45 and (avg / w) * 100 < 55:
+        elif 45 <= (avg / w) * 100 < 55:
             return "Center"
         else:
             return "Right"
@@ -143,7 +141,7 @@ class ExtractProperties:
                     distances.append(distance)
         # If the color is predicted as LIGHT check for false cases where both
         # dominan colors are White
-        if found_colors != []:
+        if found_colors:
             index = distances.index(min(distances))
             color = found_colors[index]
             if found_colors[index] == "Light":
