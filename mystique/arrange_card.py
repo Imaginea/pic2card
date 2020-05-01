@@ -32,6 +32,7 @@ class CardArrange:
     def append_image_objects(
             self,
             image_urls=None,
+            image_sizes=None,
             image_coords=None,
             pil_image=None,
             json_object=None):
@@ -39,6 +40,7 @@ class CardArrange:
 
         Keyword Arguments:
             image_urls {[list]} -- [list of image urls] (default: {None})
+            image_sizes {[list]} -- [list of image sizes] (default: {None})
             image_coords {[list]} -- [list of image points] (default: {None})
             pil_image {[PIL image]} -- [Input image] (default: {None})
             json_object {[list]} -- [list of dicts] (default: {None})
@@ -54,6 +56,8 @@ class CardArrange:
             object_json["horizontal_alignment"] = ExtractProperties().get_alignment(
                 image=pil_image, xmin=float(coords[0]), xmax=float(coords[2]))
             object_json["url"] = im
+            object_json['sizes'] = ExtractProperties().get_image_size(
+                image=pil_image, image_cropped_size=image_sizes[ctr])
             object_json['xmin'] = coords[0]
             object_json['ymin'] = coords[1]
             object_json['xmax'] = coords[2]
@@ -101,21 +105,21 @@ class CardArrange:
                     "type": "ImageSet",
                     "imageSize": "medium",
                     "images": []}
-                for object in group:
-                    if object in objects:
-                        del objects[objects.index(object)]
+                for design_object in group:
+                    if design_object in objects:
+                        del objects[objects.index(design_object)]
                     obj = {
                         "type": "Image",
                         "altText": "Image",
-                        "horizontalAlignment": object.get(
+                        "horizontalAlignment": design_object.get(
                             'horizontal_alignment',
                             ''),
-                        "url": object.get('url'),
+                        "url": design_object.get('url'),
                     }
                     image_set['images'].append(obj)
 
                 body.append(image_set)
-                ymins.append(object.get('ymin'))
+                ymins.append(design_object.get('ymin'))
 
     def return_position(self, groups, obj):
         """[Returns the position of a object inside a group]
@@ -207,7 +211,7 @@ class CardArrange:
             if ymins is not None:
                 ymins.append(obj.get('ymin'))
 
-    def append_objects(self, object, body, ymins=None, is_column=None):
+    def append_objects(self, design_object, body, ymins=None, is_column=None):
         """[Appends the individaul design elements to card body]
 
         Arguments:
@@ -218,49 +222,54 @@ class CardArrange:
             ymins {[list]} -- [list of ymins] (default: {None})
             is_column {[booelean]} -- [boolean to determine object is part of columnset or not] (default: {None})
         """
-        if object.get('object') == "image":
+        if design_object.get('object') == "image":
+            if is_column:
+                size = design_object.get('sizes')[0]
+            else:
+                size = design_object.get('sizes')[1]
             body.append({
                 "type": "Image",
                 "altText": "Image",
-                "horizontalAlignment": object.get('horizontal_alignment', ''),
-                "url": object.get('url'),
+                "horizontalAlignment": design_object.get('horizontal_alignment', ''),
+                "size": size,
+                "url": design_object.get('url')
             })
             if ymins is not None:
-                ymins.append(object.get('ymin'))
-        if object.get('object') == "textbox":
-            if (len(object.get('text', '').split()) >= 11 and not is_column) or (
-                    is_column and len(object.get('text', '')) >= 15):
+                ymins.append(design_object.get('ymin'))
+        if design_object.get('object') == "textbox":
+            if (len(design_object.get('text', '').split()) >= 11 and not is_column) or (
+                    is_column and len(design_object.get('text', '')) >= 15):
                 body.append(
                     {
                         "type": "RichTextBlock", "inlines": [
                             {
-                                "type": "TextRun", "text": object.get(
-                                    'text', ''), "size": object.get(
-                                    'size', ''), "horizontalAlignment": object.get(
-                                    'horizontal_alignment', ''), "color": object.get(
-                                    'color', 'Default'), "weight": object.get(
-                                    'weight', ''), }]})
+                                "type": "TextRun", "text": design_object.get(
+                                    'text', ''), "size": design_object.get(
+                                    'size', ''), "horizontalAlignment": design_object.get(
+                                    'horizontal_alignment', ''), "color": design_object.get(
+                                    'color', 'Default'), "weight": design_object.get(
+                                    'weight', '')}]})
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get('ymin'))
             else:
                 body.append({
                     "type": "TextBlock",
-                    "text": object.get('text', ''),
-                    "size": object.get('size', ''),
-                    "horizontalAlignment": object.get('horizontal_alignment', ''),
-                    "color": object.get('color', 'Default'),
-                    "weight": object.get('weight', ''),
+                    "text": design_object.get('text', ''),
+                    "size": design_object.get('size', ''),
+                    "horizontalAlignment": design_object.get('horizontal_alignment', ''),
+                    "color": design_object.get('color', 'Default'),
+                    "weight": design_object.get('weight', '')
                 })
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get('ymin'))
 
-            if object.get('object') == "checkbox":
+            if design_object.get('object') == "checkbox":
                 body.append({
                     "type": "Input.Toggle",
-                    "title": object.get('text', ''),
+                    "title": design_object.get('text', ''),
                 })
                 if ymins is not None:
-                    ymins.append(object.get('ymin'))
+                    ymins.append(design_object.get('ymin'))
 
     def build_card_json(self, objects=None):
         """[Builds the Adaptove card json]
@@ -274,16 +283,16 @@ class CardArrange:
         body = []
         ymins = []
         image_objects = []
-        for object in objects:
-            if object.get('object') == "image":
-                image_objects.append(object)
+        for design_object in objects:
+            if design_object.get('object') == "image":
+                image_objects.append(design_object)
         self.group_image_objects(image_objects, body, ymins, objects)
         groups = []
         unique_ymin = list(set([x.get('ymin') for x in objects]))
         for un in unique_ymin:
             l = []
             for xx in objects:
-                if abs(float(xx.get('ymin')) - float(un)) <= 11.0:
+                if abs(float(xx.get('ymin')) - float(un)) <= 10.0:
                     flag = 0
                     for gr in groups:
                         if xx in gr:
