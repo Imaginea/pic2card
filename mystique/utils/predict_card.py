@@ -79,14 +79,12 @@ class PredictCard:
                 json_object["objects"].append(object_json)
         return json_object, detected_coords
 
-    def main(self, labels_path=None, frozen_graph_path=None, image_path=None):
+    def main(self, image_path=None):
         
         image_np = cv2.imread(image_path)
         pil_image = Image.open(image_path)
         # Extract the design objects from faster rcnn model
-        output_dict, category_index = ObjectDetection().get_objects(image_path=image_path,
-            path_to_frozen_graph=frozen_graph_path, 
-            path_to_label=labels_path)
+        output_dict, category_index = ObjectDetection().get_objects(image_path=image_path)
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
             output_dict=output_dict, image_path=image_path)
