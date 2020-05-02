@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_cors import CORS
 from flask_restplus import Api
-from resources import PredictJson
+from .resources import PredictJson
 from mystique.utils.initial_setups import set_graph_and_tensors
 
 logger = logging.getLogger("mysitque")

@@ -2,6 +2,7 @@
 import argparse
 import base64
 import json
+from mystique.utils.predict_card import PredictCard
 import os
 import re
 
@@ -9,6 +10,8 @@ import requests
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+model_path = os.path.join(os.path.dirname(__file__), "../model/frozen_inference_graph.pb")
+label_path = os.path.join(os.path.dirname(__file__), "../mystique/training/object-detection.pbtxt")
 
 def build_generated_card_json(images, path, testing_file_path):
 
@@ -28,9 +31,9 @@ def build_generated_card_json(images, path, testing_file_path):
         if image not in generated_images:
             with open(path+image, "rb") as image_file:
                 base64_string = base64.b64encode(image_file.read()).decode()
-            response = requests.post("http://172.17.0.9:5050/predict_json",
-                       data=json.dumps({"image": base64_string}), 
-                       headers={"Content-Type": "application/json"})
+            response = PredictCard().main(image_path=path+image,
+                                         frozen_graph_path=model_path,
+                                         labels_path=label_path)
             content = {"filename": str(image), "card_json": response.json().get("card_json")}
             generated_jsonlines_file.write(json.dumps(content))
             generated_jsonlines_file.write("\n")

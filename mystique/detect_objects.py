@@ -15,18 +15,17 @@ if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
 class ObjectDetection:
 
 
-    def get_objects(self, image_path=None):
+    def get_objects(self, image=None):
 
         """
         Returns the objects and coordiates detected 
         from the faster rcnn detected boxes]
 
-        @param image_path: input image path
+        @param image: input image path
 
         @return: ouput dict from the faster rcnn inference
         """
-        image_np = cv2.imread(image_path)
-        output_dict = self.run_inference_for_single_image (image_np)
+        output_dict = self.run_inference_for_single_image (image)
         return output_dict, app.config['CATEGORY_INDEX']
 
     def run_inference_for_single_image(self, image):

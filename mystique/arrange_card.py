@@ -45,9 +45,8 @@ class CardArrange:
         @param json_object: list of design objects
         """
 
-        ctr = 0
         extract_properties=ExtractProperties()
-        for im in image_urls:
+        for ctr, im in enumerate(image_urls):
             coords = image_coords[ctr]
             coords = (coords[0], coords[1], coords[2], coords[3])
             object_json = dict().fromkeys(
@@ -65,7 +64,6 @@ class CardArrange:
             object_json["coords"] = ",".join(
                 [str(coords[0]), str(coords[1]), str(coords[2]), str(coords[3])])
             json_object["objects"].append(object_json)
-            ctr += 1
 
     def group_image_objects(self, image_objects, body, ymins, objects):
         
