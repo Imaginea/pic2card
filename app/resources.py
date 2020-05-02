@@ -1,14 +1,15 @@
-from flask_restplus import Resource
-from flask import request
-import os
-from datetime import datetime as dt
-import logging
-import subprocess
-import sys
+import base64
 import io
 import json
+import logging
+import os
+import sys
+from datetime import datetime as dt
+
 from PIL import Image
-import base64
+from flask import request
+from flask_restplus import Resource
+
 sys.path.append(os.getcwd())
 from mystique.utils.predict_card import PredictCard
 
@@ -36,7 +37,8 @@ class PredictJson(Resource):
 
         image.save(file_path)
         logger.debug(f"saving file {file_path}")
-        return_json = PredictCard().main(image_path=file_path, forzen_graph_path=model_path,
+        return_json = PredictCard().main(image_path=file_path,
+                                         frozen_graph_path=model_path,
                                          labels_path=label_path)
         if os.path.exists(file_path):
             os.remove(file_path)
