@@ -137,9 +137,11 @@ class ImageExtraction:
 
         @return: list of image urls.
         """
-        images = []
+        images_urls = []
+        images_sizes = []
         for coords in coords:
             cropped = image.crop((coords[0], coords[1], coords[2], coords[3]))
+            images_sizes.append(cropped.size)
             cropped.save("image_detected.png")
             img = open("image_detected.png", "rb").read()
             base64_string = base64.b64encode(img).decode()
