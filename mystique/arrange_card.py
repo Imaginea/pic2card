@@ -32,7 +32,7 @@ class CardArrange:
                             del json_object["objects"][i]
 
     def append_image_objects(self, image_urls=None, image_coords=None,
-                             pil_image=None, json_object=None):
+                             pil_image=None, json_object=None,  image_sizes=None):
 
         """
         Appends the extracted image objects to the list of design objects 
@@ -54,6 +54,8 @@ class CardArrange:
             object_json["horizontal_alignment"] = ExtractProperties().get_alignment(
                 image=pil_image, xmin=float(coords[0]), xmax=float(coords[2]))
             object_json["url"] = im
+            object_json["size"] = ExtractProperties().get_image_size(
+                image=pil_image, image_cropped_size=image_sizes[ctr])
             object_json["xmin"] = coords[0]
             object_json["ymin"] = coords[1]
             object_json["xmax"] = coords[2]
