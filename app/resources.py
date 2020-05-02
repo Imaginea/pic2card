@@ -37,9 +37,7 @@ class PredictJson(Resource):
 
         image.save(file_path)
         logger.debug(f"saving file {file_path}")
-        return_json = PredictCard().main(image_path=file_path,
-                                         frozen_graph_path=model_path,
-                                         labels_path=label_path)
+        return_json = PredictCard().main(image_path=file_path)
         if os.path.exists(file_path):
             os.remove(file_path)
         return json.loads(return_json)
