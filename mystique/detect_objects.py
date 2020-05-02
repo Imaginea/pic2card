@@ -2,17 +2,15 @@
 
 import os
 from distutils.version import StrictVersion
-
+from flask import current_app as app
 import cv2
 import numpy as np
 import tensorflow as tf
-from mystique.utils.initial_setups import set_graph_and_tensors
 
 if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
     raise ImportError(
         "Please upgrade your TensorFlow installation to v1.9.* or later!")
 
-detection_graph, category_index, tensor_dict = set_graph_and_tensors()
 
 class ObjectDetection:
 
@@ -29,7 +27,7 @@ class ObjectDetection:
         """
         image_np = cv2.imread(image_path)
         output_dict = self.run_inference_for_single_image (image_np)
-        return output_dict, category_index
+        return output_dict, app.config['CATEGORY_INDEX']
 
     def run_inference_for_single_image(self, image):
 
@@ -40,11 +38,12 @@ class ObjectDetection:
         """
 
         # Run inference
-        with detection_graph.as_default():
-            image_tensor = detection_graph.get_tensor_by_name("image_tensor:0")
+        detetection_graph = app.config['DETECTION_GRAPTH']
+        with detetection_graph.as_default():
+            image_tensor = detetection_graph.get_tensor_by_name("image_tensor:0")
             with tf.Session () as sess:
                 output_dict = sess.run(
-                    tensor_dict, feed_dict={
+                    app.config['TENSOR_DICT'], feed_dict={
                         image_tensor: np.expand_dims(
                             image, 0)})
 
