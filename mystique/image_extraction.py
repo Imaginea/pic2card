@@ -1,9 +1,13 @@
 """Module for image extraction inside the card design"""
-import cv2
-import numpy as np
+
 import base64
-import requests
+import cv2
+from io import BytesIO
+import math
+import numpy as np
 import os
+from os import environ
+import requests
 
 
 class ImageExtraction:
@@ -126,6 +130,26 @@ class ImageExtraction:
 
         return image_points
 
+    def host_image(self):
+
+        """
+        Host the image in a service to get the public url
+
+        @param base_64_string: the base64 string of the image
+                              to be hosted
+
+        @return: reposne json from the service
+        """
+        payload = {
+            "key": environ.get("SERVICE_KEY"),
+            "format": "json",
+            "tags": "sample",
+            "public": "yes"}
+        files = [("fileupload", open("image_detected.png", "rb"))]
+        response = requests.request("POST", url=environ.get("SERVICE_API"), data=payload, files=files)
+        return response
+
+
     def image_crop_get_url(self, coords=None, image=None):
 
         """
@@ -142,21 +166,18 @@ class ImageExtraction:
         for coords in coords:
             cropped = image.crop((coords[0], coords[1], coords[2], coords[3]))
             images_sizes.append(cropped.size)
-            cropped.save("image_detected.png")
-            img = open("image_detected.png", "rb").read()
-            base64_string = base64.b64encode(img).decode()
-            url = "https://post.imageshack.us/upload_api.php"
-            payload = {"key": "0346ANQUe74917fd7160ababf178d69779a76c7c",
-                       "format": "json",
-                       "tags": "sample",
-                       "public": "yes"}
-            files = [
-                ("fileupload", open("image_detected.png", "rb"))
-            ]
-            response = requests.request("POST", url, data=payload, files=files)
-            images_urls.append(response.json().get(
-                "links", {}).get("image_link", ""))
-            # images.append("")
+            buff = BytesIO()
+            cropped.save(buff, format="PNG")
+            base64_string = base64.b64encode(buff.getvalue()).decode()
+            images_urls.append(f"data:image/png;base64,{base64_string}")
+            
+            size=(len(base64_string) * 3 / 4) - base64_string.count('=', -2)
+            if size>=1000000:
+                images_urls.append('https://upload.wikimedia.org/wikipedia/commons/0/09/Dummy_flag.png')
+            #response=self.host_image(base64_string)    
+            #images_urls.append(response.json().get(
+                #  "links", {}).get("image_link", ""))
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")
         return images_urls, images_sizes
+        

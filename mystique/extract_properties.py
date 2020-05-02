@@ -72,8 +72,8 @@ class ExtractProperties:
         @return: size and weight
         """
         cropped_image = image.crop(coords)
-        img = np.array(cropped_image)
-        img = img[:, :, ::-1].copy()
+        img = np.asarray(cropped_image)
+        img=cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         # preprocess
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.blur(gray, (5, 5))

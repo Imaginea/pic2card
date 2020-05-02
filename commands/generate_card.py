@@ -10,13 +10,11 @@ import argparse
 import sys
 import os
 
-sys.path.append (os.getcwd ())
 from mystique.utils.predict_card import PredictCard
 import os
+from PIL import Image
 import sys
 import json
-
-sys.path.append (os.getcwd () + "/mystique/utils")
 
 
 def main (image_path=None, frozen_graph_path=None, labels_path=None):
@@ -28,9 +26,8 @@ def main (image_path=None, frozen_graph_path=None, labels_path=None):
     @param frozen_graph_path: path to frozen graph
     @param labels_path: path to labels mapping
     """
-    card_json = PredictCard().main(image_path=image_path,
-                                    frozen_graph_path=frozen_graph_path, 
-                                    labels_path=labels_path)
+    image=Image.open(image_path)
+    card_json = PredictCard().main(image=image)
     print (json.dumps(json.loads(card_json).get('card_json'), indent=2))
 
 

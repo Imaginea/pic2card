@@ -11,14 +11,13 @@ from mystique.arrange_card import CardArrange
 from mystique.detect_objects import ObjectDetection
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
-
-sys.path.append(os.getcwd())
+import numpy as np
 
 
 class PredictCard:
 
     
-    def collect_objects(self, output_dict=None, image_path=None):
+    def collect_objects(self, output_dict=None, pil_image=None):
 
         """
         Returns the design elements from the faster rcnn model with its 
@@ -36,7 +35,6 @@ class PredictCard:
         r, c = boxes.shape
         detected_coords = []
         json_object = {}.fromkeys(["objects"], [])
-        pil_image = Image.open(image_path)
         width, height = pil_image.size
         for i in range(r):
             if scores[i] * 100 >= 90.0:
@@ -62,11 +60,6 @@ class PredictCard:
                 object_json["score"] = scores[i]
                 if object_json["object"] == "textbox":
                     detected_coords.append((xmin - 5, ymin, xmax + 5, ymax))
-                else:
-                    detected_coords.append((xmin, ymin, xmax, ymax))
-                object_json["text"] = extract_properties.get_text(
-                    image=pil_image, coords=(xmin, ymin, xmax, ymax))
-                if object_json["object"] == "textbox":
                     object_json["size"], object_json["weight"] = \
                         extract_properties.get_size_and_weight(image=pil_image, 
                                                                 coords=(xmin, ymin, xmax, ymax))
@@ -76,25 +69,39 @@ class PredictCard:
                     object_json["color"] =\
                         extract_properties.get_colors(image=pil_image, 
                                                        coords=(xmin, ymin, xmax, ymax))
+                else:
+                    detected_coords.append((xmin, ymin, xmax, ymax))
+                object_json["text"] = extract_properties.get_text(
+                    image=pil_image, coords=(xmin, ymin, xmax, ymax))
                 json_object["objects"].append(object_json)
         return json_object, detected_coords
 
-    def main(self, image_path=None):
-        
-        image_np = cv2.imread(image_path)
-        pil_image = Image.open(image_path)
+    def main(self, image=None):
+
+        """
+        Handles the different components calling and returns the 
+        predicted card json to the API
+
+        @param labels_path: faster rcnn model's label path
+        @param forzen_graph_path: faster rcnn model path
+        @param image: input image path
+
+        @return: predicted card json
+        """
+        image_np = np.asarray(image)
+        image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR) 
         # Extract the design objects from faster rcnn model
         obj_detection = ObjectDetection()
-        output_dict, category_index = obj_detection.get_objects(image_path=image_path)
+        output_dict, category_index = obj_detection.get_objects(image=image_np)
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
-            output_dict=output_dict, image_path=image_path)
+            output_dict=output_dict, pil_image=image)
         # Detect image coordinates inside the card design
         image_extraction=ImageExtraction()
         image_points = image_extraction.detect_image(
-            image=image_np, detected_coords=detected_coords, pil_image=pil_image)
+            image=image_np, detected_coords=detected_coords, pil_image=image)
         image_urls,image_sizes = image_extraction.image_crop_get_url(
-            coords=image_points, image=pil_image)
+            coords=image_points, image=image)
 
         # Arrange the design elements
         card_arrange=CardArrange()
@@ -103,7 +110,7 @@ class PredictCard:
             image_urls=image_urls,
             image_sizes=image_sizes,
             image_coords=image_points,
-            pil_image=pil_image,
+            pil_image=image,
             json_object=json_objects)
         return_dict = {}.fromkeys(["card_json"], "")
         card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [
