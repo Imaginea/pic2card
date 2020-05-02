@@ -154,9 +154,9 @@ class ImageExtraction:
                 ("fileupload", open("image_detected.png", "rb"))
             ]
             response = requests.request("POST", url, data=payload, files=files)
-            images.append(response.json().get(
+            images_urls.append(response.json().get(
                 "links", {}).get("image_link", ""))
             # images.append("")
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")
-        return images
+        return images_urls, images_sizes
