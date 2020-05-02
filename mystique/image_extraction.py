@@ -159,4 +159,4 @@ class ImageExtraction:
             # images.append("")
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")
-        return images_urls,images_sizes
+        return images_urls, images_sizes

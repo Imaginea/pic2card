@@ -14,6 +14,7 @@ class CardArrange:
 
         @param json_object: list of design objects
         """
+        image_extraction=ImageExtraction()
         for i in range(len(json_object["objects"])):
             for j in range(i + 1, len(json_object["objects"])):
                 if i < len(
@@ -23,7 +24,7 @@ class CardArrange:
                     coordsj = json_object["objects"][j].get("coords")
                     box1 = [float(c) for c in coordsi.split(",")]
                     box2 = [float(c) for c in coordsj.split(",")]
-                    intersection = ImageExtraction().find_points(box1, box2)
+                    intersection = image_extraction.find_points(box1, box2)
                     if intersection:
                         if json_object["objects"][i].get(
                                 "score") > json_object["objects"][j].get("score"):
@@ -45,16 +46,17 @@ class CardArrange:
         """
 
         ctr = 0
+        extract_properties=ExtractProperties()
         for im in image_urls:
             coords = image_coords[ctr]
             coords = (coords[0], coords[1], coords[2], coords[3])
             object_json = dict().fromkeys(
                 ["object", "xmin", "ymin", "xmax", "ymax"], "")
             object_json["object"] = "image"
-            object_json["horizontal_alignment"] = ExtractProperties().get_alignment(
+            object_json["horizontal_alignment"] = extract_properties.get_alignment(
                 image=pil_image, xmin=float(coords[0]), xmax=float(coords[2]))
             object_json["url"] = im
-            object_json["size"] = ExtractProperties().get_image_size(
+            object_json["sizes"] = extract_properties.get_image_size(
                 image=pil_image, image_cropped_size=image_sizes[ctr])
             object_json["xmin"] = coords[0]
             object_json["ymin"] = coords[1]
@@ -206,10 +208,15 @@ class CardArrange:
                           a column element
         """
         if design_object.get("object") == "image":
+            if is_column:
+                size = design_object.get('sizes')[0]
+            else:
+                size = design_object.get('sizes')[1]
             body.append({
                 "type": "Image",
                 "altText": "Image",
                 "horizontalAlignment": design_object.get("horizontal_alignment", ""),
+                "size":size,
                 "url": design_object.get("url"),
                 })
             if ymins is not None:

@@ -29,6 +29,7 @@ class PredictCard:
         @return: Collected json of the design objects 
                  and list of detected object's coordinates
         """
+        extract_properties=ExtractProperties()
         boxes = output_dict["detection_boxes"]
         scores = output_dict["detection_scores"]
         classes = output_dict["detection_classes"]
@@ -63,17 +64,17 @@ class PredictCard:
                     detected_coords.append((xmin - 5, ymin, xmax + 5, ymax))
                 else:
                     detected_coords.append((xmin, ymin, xmax, ymax))
-                object_json["text"] = ExtractProperties().get_text(
+                object_json["text"] = extract_properties.get_text(
                     image=pil_image, coords=(xmin, ymin, xmax, ymax))
                 if object_json["object"] == "textbox":
                     object_json["size"], object_json["weight"] = \
-                        ExtractProperties().get_size_and_weight(image=pil_image, 
+                        extract_properties.get_size_and_weight(image=pil_image, 
                                                                 coords=(xmin, ymin, xmax, ymax))
                     object_json["horizontal_alignment"] = \
-                        ExtractProperties().get_alignment(image=pil_image, 
+                        extract_properties.get_alignment(image=pil_image, 
                                                           xmin=float(xmin), xmax=float(xmax))
                     object_json["color"] =\
-                        ExtractProperties().get_colors(image=pil_image, 
+                        extract_properties.get_colors(image=pil_image, 
                                                        coords=(xmin, ymin, xmax, ymax))
                 json_object["objects"].append(object_json)
         return json_object, detected_coords
@@ -90,14 +91,16 @@ class PredictCard:
         json_objects, detected_coords = self.collect_objects(
             output_dict=output_dict, image_path=image_path)
         # Detect image coordinates inside the card design
-        image_points = ImageExtraction().detect_image(
+        image_extraction=ImageExtraction()
+        image_points = image_extraction.detect_image(
             image=image_np, detected_coords=detected_coords, pil_image=pil_image)
-        image_urls,image_sizes = ImageExtraction().image_crop_get_url(
+        image_urls,image_sizes = image_extraction.image_crop_get_url(
             coords=image_points, image=pil_image)
 
         # Arrange the design elements
-        CardArrange().remove_overlapping_objects(json_object=json_objects)
-        CardArrange().append_image_objects(
+        card_arrange=CardArrange()
+        card_arrange.remove_overlapping_objects(json_object=json_objects)
+        card_arrange.append_image_objects(
             image_urls=image_urls,
             image_sizes=image_sizes,
             image_coords=image_points,
@@ -106,7 +109,7 @@ class PredictCard:
         return_dict = {}.fromkeys(["card_json"], "")
         card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [
         ], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
-        body, ymins = CardArrange().build_card_json(
+        body, ymins = card_arrange.build_card_json(
             objects=json_objects.get("objects", []))
         # Sort the elements vertically
         body = [x for _, x in sorted(zip(ymins, body))]
