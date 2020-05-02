@@ -84,7 +84,8 @@ class PredictCard:
         image_np = cv2.imread(image_path)
         pil_image = Image.open(image_path)
         # Extract the design objects from faster rcnn model
-        output_dict, category_index = ObjectDetection().get_objects(image_path=image_path)
+        obj_detection = ObjectDetection()
+        output_dict, category_index = obj_detection.get_objects(image_path=image_path)
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
             output_dict=output_dict, image_path=image_path)
