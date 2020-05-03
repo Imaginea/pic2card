@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from PIL import Image
-from flask import request, jsonify
+from flask import request
 from flask_restplus import Resource
 from mystique.utils.predict_card import PredictCard
 from utils import get_templates
