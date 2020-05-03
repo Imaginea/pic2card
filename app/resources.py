@@ -8,7 +8,7 @@ from PIL import Image
 from flask import request
 from flask_restplus import Resource
 from mystique.utils.predict_card import PredictCard
-from utils import get_templates
+from .utils import get_templates
 
 
 logger = logging.getLogger('mysitque')
