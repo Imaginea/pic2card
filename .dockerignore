@@ -2,3 +2,4 @@ venv/
 notebooks/
 .git/
 .gitignore/
+data/
