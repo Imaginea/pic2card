@@ -2,10 +2,12 @@
 
 import os
 from distutils.version import StrictVersion
-from flask import current_app as app
 import cv2
 import numpy as np
 import tensorflow as tf
+
+from utils import timeit
+
 
 if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
     raise ImportError(
@@ -14,22 +16,28 @@ if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
 
 class ObjectDetection:
 
+    def __init__(self, detection_graph, category_index, tensor_dict):
+        """
+        Initialize the object detection using model loaded from forzen graph
+        """
+        self.detection_graph = detection_graph
+        self.category_index = category_index
+        self.tensor_dict = tensor_dict
 
     def get_objects(self, image=None):
-
         """
-        Returns the objects and coordiates detected 
+        Returns the objects and coordiates detected
         from the faster rcnn detected boxes]
 
         @param image: input image path
 
         @return: ouput dict from the faster rcnn inference
         """
-        output_dict = self.run_inference_for_single_image (image)
-        return output_dict, app.config['CATEGORY_INDEX']
+        with timeit("object-detection-only") as t:
+            output_dict = self.run_inference_for_single_image (image)
+        return output_dict, self.category_index
 
     def run_inference_for_single_image(self, image):
-
         """
         Runs the inference graph for the given image
         @param image: numpy array of input design image
@@ -37,12 +45,12 @@ class ObjectDetection:
         """
 
         # Run inference
-        detetection_graph = app.config['DETECTION_GRAPTH']
-        with detetection_graph.as_default():
-            image_tensor = detetection_graph.get_tensor_by_name("image_tensor:0")
+        detection_graph = self.detection_graph
+        with detection_graph.as_default():
+            image_tensor = detection_graph.get_tensor_by_name("image_tensor:0")
             with tf.Session () as sess:
                 output_dict = sess.run(
-                    app.config['TENSOR_DICT'], feed_dict={
+                    self.tensor_dict, feed_dict={
                         image_tensor: np.expand_dims(
                             image, 0)})
 

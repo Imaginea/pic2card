@@ -16,16 +16,21 @@ import numpy as np
 
 class PredictCard:
 
-    
+    def __init__(self, od_model):
+        """
+        Find the card components using Object detection model
+        """
+        self.od_model = od_model
+
     def collect_objects(self, output_dict=None, pil_image=None):
 
         """
-        Returns the design elements from the faster rcnn model with its 
+        Returns the design elements from the faster rcnn model with its
         properties mapped
 
         @param output_dict: output dict from the object detection
 
-        @return: Collected json of the design objects 
+        @return: Collected json of the design objects
                  and list of detected object's coordinates
         """
         extract_properties=ExtractProperties()
@@ -61,13 +66,13 @@ class PredictCard:
                 if object_json["object"] == "textbox":
                     detected_coords.append((xmin - 5, ymin, xmax + 5, ymax))
                     object_json["size"], object_json["weight"] = \
-                        extract_properties.get_size_and_weight(image=pil_image, 
+                        extract_properties.get_size_and_weight(image=pil_image,
                                                                 coords=(xmin, ymin, xmax, ymax))
                     object_json["horizontal_alignment"] = \
-                        extract_properties.get_alignment(image=pil_image, 
+                        extract_properties.get_alignment(image=pil_image,
                                                           xmin=float(xmin), xmax=float(xmax))
                     object_json["color"] =\
-                        extract_properties.get_colors(image=pil_image, 
+                        extract_properties.get_colors(image=pil_image,
                                                        coords=(xmin, ymin, xmax, ymax))
                 else:
                     detected_coords.append((xmin, ymin, xmax, ymax))
@@ -79,7 +84,7 @@ class PredictCard:
     def main(self, image=None):
 
         """
-        Handles the different components calling and returns the 
+        Handles the different components calling and returns the
         predicted card json to the API
 
         @param labels_path: faster rcnn model's label path
@@ -89,10 +94,9 @@ class PredictCard:
         @return: predicted card json
         """
         image_np = np.asarray(image)
-        image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR) 
+        image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # Extract the design objects from faster rcnn model
-        obj_detection = ObjectDetection()
-        output_dict, category_index = obj_detection.get_objects(image=image_np)
+        output_dict, category_index = self.od_model.get_objects(image=image_np)
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
             output_dict=output_dict, pil_image=image)

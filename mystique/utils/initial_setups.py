@@ -1,10 +1,14 @@
-""" Module for setting up the tensorflow graphs and tensors for faster rcnn object detection """
+""" Module for setting up the tensorflow graphs and tensors for faster rcnn
+object detection
+"""
 import os
 import tensorflow as tf
 from object_detection.utils import label_map_util
 
-model_path = os.path.join(os.path.dirname(__file__), "../../model/frozen_inference_graph.pb")
-label_path = os.path.join(os.path.dirname(__file__), "../training/object-detection.pbtxt")
+model_path = os.path.join(os.path.dirname(__file__),
+                          "../../model/frozen_inference_graph.pb")
+label_path = os.path.join(os.path.dirname(__file__),
+                          "../training/object-detection.pbtxt")
 
 
 def set_graph_and_tensors():
@@ -14,7 +18,8 @@ def set_graph_and_tensors():
     """
     tensor_dict = dict()
     # requred tensors from inference graph
-    tensors = ["num_detections", "detection_boxes", "detection_scores", "detection_classes"]
+    tensors = ["detection_boxes", "detection_scores",
+               "detection_classes"]
     detection_graph = tf.Graph ()
     #setting up default graph with graphs from inference graph
     with detection_graph.as_default() as default_graph:
@@ -28,7 +33,9 @@ def set_graph_and_tensors():
         for tensor in tensors:
             tmp_tensor_name = tensor + ":0"
             if tmp_tensor_name in all_tensor_names:
-                tensor_dict[tensor] = default_graph.get_tensor_by_name(tmp_tensor_name)
+                tensor_dict[tensor] = default_graph.get_tensor_by_name(
+                    tmp_tensor_name
+                )
 
     category_index = label_map_util.create_category_index_from_labelmap (
         label_path, use_display_name=True)
