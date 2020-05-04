@@ -122,7 +122,19 @@ class PredictCard:
         body, ymins = card_arrange.build_card_json(
             objects=json_objects.get("objects", []))
         # Sort the elements vertically
-        body = [x for _, x in sorted(zip(ymins, body))]
-        card_json["body"] = body
+        body = [x for _, x in sorted(zip(ymins, body), key=lambda x: x[0])]
+
+        # Prepare the response with error code
+        error = None
+        if not body:
+            error = {
+                "msg": "Failed to generate card components",
+                "code": 1000
+            }
+        else:
+            card_json["body"] = body
+
         return_dict["card_json"] = card_json
-        return json.dumps(return_dict)
+        return_dict["error"] = error
+
+        return return_dict

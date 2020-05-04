@@ -6,8 +6,6 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from utils import timeit
-
 
 if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
     raise ImportError(
@@ -33,8 +31,7 @@ class ObjectDetection:
 
         @return: ouput dict from the faster rcnn inference
         """
-        with timeit("object-detection-only") as t:
-            output_dict = self.run_inference_for_single_image (image)
+        output_dict = self.run_inference_for_single_image (image)
         return output_dict, self.category_index
 
     def run_inference_for_single_image(self, image):

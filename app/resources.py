@@ -11,7 +11,6 @@ from flask import current_app
 
 from mystique.utils.predict_card import PredictCard
 from .utils import get_templates
-from utils import timeit
 
 
 logger = logging.getLogger('mysitque')
@@ -32,14 +31,27 @@ class PredictJson(Resource):
         predicts the adaptive card json for the posted image
         :return: adaptive card json
         """
-        imgdata = base64.b64decode(request.json.get('image', ''))
-        image = Image.open(io.BytesIO(imgdata))
-        predict_card = PredictCard(current_app.od_model)
-
-        with timeit("predict-card") as t:
+        try:
+            imgdata = base64.b64decode(request.json.get('image', ''))
+            image = Image.open(io.BytesIO(imgdata))
+            predict_card = PredictCard(current_app.od_model)
             return_json = predict_card.main(image=image)
+            return return_json
 
-        return json.loads(return_json)
+        except Exception as ex:
+            error_msg = f"Unhandled Error, failed to process the request: {ex}"
+            logger.error(error_msg)
+
+            response = {
+                "error": {
+                    "msg": error_msg,
+                    "code": 1001
+                },
+                "card_json": None
+            }
+            return response
+
+
 
 class GetCardTemplates(Resource):
     """
