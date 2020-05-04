@@ -11,26 +11,45 @@ class CardArrange:
         """
         Removes the overlapping faster rcnn detected objects by
         finding the intersection between 2 objects.
+        And removes the overlapping text objects on actionsets.
 
         @param json_object: list of design objects
         """
         image_extraction=ImageExtraction()
+        positions_to_delete=[]
         for i in range(len(json_object["objects"])):
-            for j in range(i + 1, len(json_object["objects"])):
+            for j in range(i, len(json_object["objects"])):
                 if i < len(
                         json_object["objects"]) and j < len(
-                        json_object["objects"]):
+                        json_object["objects"]) and i!=j:
                     coordsi = json_object["objects"][i].get("coords")
                     coordsj = json_object["objects"][j].get("coords")
                     box1 = [float(c) for c in coordsi.split(",")]
                     box2 = [float(c) for c in coordsj.split(",")]
                     intersection = image_extraction.find_points(box1, box2)
                     if intersection:
-                        if json_object["objects"][i].get(
-                                "score") > json_object["objects"][j].get("score"):
-                            del json_object["objects"][j]
-                        else:
-                            del json_object["objects"][i]
+                        if json_object["objects"][i].get("score") \
+                            > json_object["objects"][j].get("score") \
+                                and j not in positions_to_delete \
+                                and json_object["objects"][j].get("object")!="actionset":
+                                positions_to_delete.append(j)
+                        elif i not in positions_to_delete\
+                             and json_object["objects"][i].get("object")!="actionset":
+                            positions_to_delete.append(i)
+                    contains = (float(box2[0]) <= box1[0]<= float(box2[2]))\
+                         and (float(box2[1]) <= box1[1] <= float(box2[3]))
+                    if contains and not (json_object["objects"][i].get("object")=="actionset" \
+                        and json_object["objects"][j].get("object")=="actionset"):
+                         if json_object["objects"][i].get("object")=="actionset" \
+                             or json_object["objects"][j].get("object")=="actionset":
+                            box1_area=(box1[2]-box1[0])*(box1[3]-box1[1])
+                            box2_area=(box2[2]-box2[0])*(box2[3]-box2[1])
+                            if box1_area>box2_area and j not in positions_to_delete:
+                                    positions_to_delete.append(j)
+                            elif i not in positions_to_delete:
+                                positions_to_delete.append(i)
+        json_object['objects']=[x for ctr, x in enumerate(json_object['objects']) \
+            if ctr not in positions_to_delete]
 
     def append_image_objects(self, image_urls=None, image_coords=None,
                              pil_image=None, json_object=None,  image_sizes=None):
@@ -205,6 +224,19 @@ class CardArrange:
         @param is_column: boolean flag to determine
                           a column element
         """
+        if design_object.get("object")=="actionset":
+            body.append({
+                "type": "ActionSet",
+                "separator": "true",
+                "actions": [{
+                    "type": "Action.Submit",
+                    "title": design_object.get('text'),
+                    "style":design_object.get('style')
+                    }],
+                    "spacing": "Medium"
+                    })
+            if ymins is not None:
+                ymins.append(design_object.get("ymin"))
         if design_object.get("object") == "image":
             if is_column:
                 size = design_object.get('sizes')[0]

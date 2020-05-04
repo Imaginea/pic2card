@@ -51,6 +51,8 @@ class PredictCard:
                     object_json["object"] = "radiobutton"
                 elif str(classes[i]) == "3":
                     object_json["object"] = "checkbox"
+                elif str(classes[i]) == "4":
+                    object_json['object']="actionset"
 
                 ymin = boxes[i][0] * height
                 xmin = boxes[i][1] * width
@@ -63,6 +65,9 @@ class PredictCard:
                 object_json["ymax"] = float(ymax)
                 object_json["coords"] = ",".join([str(xmin), str(ymin), str(xmax), str(ymax)])
                 object_json["score"] = scores[i]
+                if object_json["object"]=="actionset":
+                    object_json["style"]=extract_properties.get_actionset_type(image=pil_image, \
+                        coords=(xmin,ymin,xmax,ymax))
                 if object_json["object"] == "textbox":
                     detected_coords.append((xmin - 5, ymin, xmax + 5, ymax))
                     object_json["size"], object_json["weight"] = \
@@ -93,6 +98,7 @@ class PredictCard:
 
         @return: predicted card json
         """
+        image=image.convert('RGB')
         image_np = np.asarray(image)
         image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # Extract the design objects from faster rcnn model
@@ -126,7 +132,7 @@ class PredictCard:
 
         # Prepare the response with error code
         error = None
-        if not body:
+        if not body or not detected_coords:
             error = {
                 "msg": "Failed to generate card components",
                 "code": 1000

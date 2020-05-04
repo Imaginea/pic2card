@@ -1,12 +1,51 @@
 """Module for extracting design element's properties"""
 
 from pytesseract import pytesseract
+from PIL import Image
 import cv2
 import numpy as np
 import math
 
 
 class ExtractProperties:
+    
+    def get_actionset_type(self, image=None, coords=None):
+        """
+        Returns the actionset style by finding the
+        closes background color of the obejct
+        
+        @param image: input PIL image
+        @param coords: object's coordinate
+        
+        @return : style string of the actionset
+        """
+        cropped_image = image.crop(coords)
+        # get 2 dominant colors
+        quantized = cropped_image.quantize(colors=2, method=2)
+        #extract the background color
+        background_color = quantized.getpalette()[:3]
+        colors = {
+            "destructive": [(255, 0, 0), (180, 8, 0), \
+                (220, 54, 45), (194, 25, 18), (143, 7, 0)],
+            "positive": [(0, 0, 255), (7, 47, 95), \
+                (18, 97, 160), (56, 149, 211)]
+                }
+        style = "default"
+        found_colors = []
+        distances = []
+        # find the dominant background colors based on the RGB difference
+        for key, values in colors.items():
+            for value in values:
+                distance = np.sqrt(
+                    np.sum((np.asarray(value) - np.asarray(background_color))\
+                        ** 2))
+                if distance <= 150:
+                    found_colors.append(key)
+                    distances.append(distance)
+        if found_colors:
+            index = distances.index(min(distances))
+            style = found_colors[index]
+        return style
 
     def get_image_size(self, image=None, image_cropped_size=None):
         """[get the image size with respect to the card size]
@@ -31,13 +70,11 @@ class ExtractProperties:
         elif area_proportionate > 5:
             sizes[0] = "Large"
 
-        if area_proportionate > 10 and area_proportionate <= 40:
-            sizes[1] = "Large"
-        elif area_proportionate >= 0 and area_proportionate < 4:
+        if area_proportionate >= 0 and area_proportionate < 4:
             sizes[1] = "Small"
-        elif area_proportionate >= 4 and area_proportionate <= 10:
+        elif area_proportionate >= 4 and area_proportionate <=9:
             sizes[1] = "Medium"
-        elif area_proportionate > 40.0:
+        elif area_proportionate > .0:
             sizes[1] = "Auto"
         return sizes
 
@@ -55,6 +92,8 @@ class ExtractProperties:
         coords = (coords[0] - 5, coords[1], coords[2] + 5, coords[3])
         cropped_image = image.crop(coords)
         cropped_image = cropped_image.convert("LA")
+        w,h=cropped_image.size
+        cropped_image=cropped_image.resize((w*10, h*10), Image.ANTIALIAS)
 
         return pytesseract.image_to_string(
             cropped_image, lang="eng", config="--psm 6")
