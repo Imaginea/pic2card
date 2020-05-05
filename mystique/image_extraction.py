@@ -123,32 +123,15 @@ class ImageExtraction:
         # =image_points[:-1]
         width, height = pil_image.size
         widths = [point[2] - point[0] for point in image_points]
-        if widths:
-            position = widths.index(max(widths))
-            if max(widths) - width <= 10:
-                del image_points[position]
+        heights = [point[3] - point[1] for point in image_points]
+        if widths and heights:
+            position_w = widths.index(max(widths))
+            position_h = heights.index(max(heights))
+            if ((max(widths)*max(heights)/(width*height)))*100>=70.0\
+                and position_h==position_w:
+                del image_points[position_w]
 
         return image_points
-
-    def host_image(self):
-
-        """
-        Host the image in a service to get the public url
-
-        @param base_64_string: the base64 string of the image
-                              to be hosted
-
-        @return: reposne json from the service
-        """
-        payload = {
-            "key": environ.get("SERVICE_KEY"),
-            "format": "json",
-            "tags": "sample",
-            "public": "yes"}
-        files = [("fileupload", open("image_detected.png", "rb"))]
-        response = requests.request("POST", url=environ.get("SERVICE_API"), data=payload, files=files)
-        return response
-
 
     def image_crop_get_url(self, coords=None, image=None):
 
@@ -173,10 +156,7 @@ class ImageExtraction:
             
             size=(len(base64_string) * 3 / 4) - base64_string.count('=', -2)
             if size>=1000000:
-                images_urls.append('https://upload.wikimedia.org/wikipedia/commons/0/09/Dummy_flag.png')
-            #response=self.host_image(base64_string)    
-            #images_urls.append(response.json().get(
-                #  "links", {}).get("image_link", ""))
+                images_urls.append('https://lh3.googleusercontent.com/-snm-WznsB3k/XrAWKVCBC3I/AAAAAAAAB8Y/tR-2f8CzboQCmyTzrAfj9Xtvnbeh9PJ8QCK8BGAsYHg/s0/2020-05-04.png')
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")
         return images_urls, images_sizes

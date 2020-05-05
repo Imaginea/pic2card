@@ -10,3 +10,8 @@ item {
     id: 3
     name: 'checkbox'
 }
+item {
+    id: 4
+    name: 'actionset'
+}
+
