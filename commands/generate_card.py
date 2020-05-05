@@ -9,15 +9,15 @@ python generate_card.py --image_path=/path/to/input/image
 import argparse
 import sys
 import os
+import json
 
 import numpy as np
+from PIL import Image
+from flask import current_app
+
 from mystique.detect_objects import ObjectDetection
 from mystique.predict_card import PredictCard
-from PIL import Image
 from mystique.initial_setups import set_graph_and_tensors
-import sys
-import json
-from flask import current_app
 
 def main (image_path=None):
 
