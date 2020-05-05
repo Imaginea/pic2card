@@ -16,13 +16,15 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 
 ## Process flow for card prediction
 1. Using the service
-     1. ``` shell
+   
+   1. By curl:
+    ``` shell
        curl --header "Content-Type: application/json" \
        --request POST \
        --data '{"image":"base64 of the image"}'
-       https://mystique.azurewebsites.net/predict_json
-       ```
-     2.  Or on uploading or selecting any card design image templates , using the [service ui](https://mystique-app.azurewebsites.net/)
+    https://mystique.azurewebsites.net/predict_json
+    ```
+    2.  Or on uploading or selecting any card design image templates , using the [service ui](https://mystique-app.azurewebsites.net/)
 
 
 
