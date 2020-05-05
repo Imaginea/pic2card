@@ -139,8 +139,3 @@ After the [Tensorflow ,Tensorflow models intsallation](https://tensorflow-object
   ```
 
 8. Can view the rcnn trained model's beaviour using the Jupyter notebook available under notebooks
-
-  ​
-
-
-
