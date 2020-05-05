@@ -16,17 +16,22 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 
 ## Process flow for card prediction
 1. Using the service
+     1. ``` shell
+       curl --header "Content-Type: application/json" \
+       --request POST \
+       --data '{"image":"base64 of the image"}'
+       https://mystique.azurewebsites.net/predict_json
+       ```
+     2.  Or on uploading or selecting any card design image templates , using the [service ui](https://mystique-app.azurewebsites.net/)
 
-   ```shell
-   curl --header "Content-Type: application/json" \
-   --request POST \
-   --data '{"image":"base64 of the image"}'
-   https://mystique.azurewebsites.net/predict_json
-   ```
 
-   Or on uploading or selecting any card design image templates , using the [service ui](https://mystique-app.azurewebsites.net/)
+
 
 ![Working Screenshot](./images/working1.jpg)
+
+
+
+
 
 ![Working Screenshot](./images/working2.png)
 
@@ -34,10 +39,10 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 
 2. Using command
 
-   ```
+```
    python -m commands.generate_card  --image_path="path/to/image"
-   ```
-   
+```
+
    ​
 ## Training 
 After the [Tensorflow ,Tensorflow models intsallation](https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/install.html):
