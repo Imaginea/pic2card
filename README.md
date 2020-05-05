@@ -8,13 +8,13 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 ![Pic2Card](./images/pic2card.png)
 
 
-##Architecture
+## Architecture
 ![Prediction Architecture](./images/architecture.png)
 
 
 
 
-##Process flow for card prediction
+## Process flow for card prediction
 1. Using the service
 
    On uploading or selecting any card design image templates ,
@@ -32,7 +32,7 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
    ```
    
    ​
-##Training 
+## Training 
 For training the custom design elements using the faster rcnn model, refer [here](https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/training.html).
 
 After the Tensorflow and Tensorflow models intsallation:
