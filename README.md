@@ -76,7 +76,7 @@ After the Tensorflow and Tensorflow models intsallation:
 
 5. set below paths appropriately in pipeline.config file
 
-  ```json
+  ```
   num_classes: -- number of labels
   fine_tune_checkpoint ---- path to faster_rcnn_inception_v2_coco_2018_01_28/model.ckpt
       tf_record_input_reader 
