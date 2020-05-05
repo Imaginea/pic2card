@@ -45,7 +45,7 @@ class ObjectDetection:
         detection_graph = self.detection_graph
         with detection_graph.as_default():
             image_tensor = detection_graph.get_tensor_by_name("image_tensor:0")
-            with tf.Session () as sess:
+            with tf.compat.v1.Session () as sess:
                 output_dict = sess.run(
                     self.tensor_dict, feed_dict={
                         image_tensor: np.expand_dims(
