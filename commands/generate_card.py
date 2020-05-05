@@ -18,7 +18,6 @@ from mystique.initial_setups import set_graph_and_tensors
 import sys
 import json
 from flask import current_app
-import cv2
 
 def main (image_path=None):
 
@@ -28,13 +27,8 @@ def main (image_path=None):
     @param image_path: input image path
     """
     image=Image.open(image_path)
-    image=image.convert('RGB')
-    image_np = np.asarray(image)
-    image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
     object_detection=ObjectDetection(*set_graph_and_tensors())
-    # Extract the design objects from faster rcnn model
-    output_dict, category_index = object_detection.get_objects(image=image_np)
-    card_json = PredictCard().generate_card(output_dict, image, image_np)
+    card_json = PredictCard(object_detection).main(image=image)
     print (json.dumps(card_json.get('card_json'), indent=2))
 
 
