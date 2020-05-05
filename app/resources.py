@@ -1,15 +1,21 @@
 """ resources for api """
-import base64
+import sys
+import os
 import io
+import base64
 import json
 import logging
-import os
+
+import numpy as np
+import cv2
+import requests
 from PIL import Image
 from flask import request
 from flask_restplus import Resource
 from flask import current_app
 
-from mystique.utils.predict_card import PredictCard
+from mystique.predict_card import PredictCard
+from mystique import config
 from .utils import get_templates
 
 
@@ -17,14 +23,27 @@ logger = logging.getLogger('mysitque')
 
 cur_dir = os.path.dirname(__file__)
 input_image_collection = os.path.join(cur_dir, 'input_image_collection')
-model_path = os.path.join(os.path.dirname(__file__), "../model/frozen_inference_graph.pb")
-label_path = os.path.join(os.path.dirname(__file__), "../mystique/training/object-detection.pbtxt")
+model_path = os.path.join(os.path.dirname(__file__),
+                          "../model/frozen_inference_graph.pb")
+label_path = os.path.join(os.path.dirname(__file__),
+                          "../mystique/training/object-detection.pbtxt")
 
 
 class PredictJson(Resource):
     """
     Handling Adaptive Card Predictions
     """
+    def _get_card_object(self, bs64_img: str):
+        """
+        From base64 image generate adaptive card schema.
+
+        Make use of the frozen graph for inferencing.
+        """
+        imgdata = base64.b64decode(bs64_img)
+        image = Image.open(io.BytesIO(imgdata))
+        predict_card = PredictCard(current_app.od_model)
+        card = predict_card.main(image=image)
+        return card
 
     def post(self):
         """
@@ -32,16 +51,22 @@ class PredictJson(Resource):
         :return: adaptive card json
         """
         try:
-            imgdata = base64.b64decode(request.json.get('image', ''))
-            image = Image.open(io.BytesIO(imgdata))
-            predict_card = PredictCard(current_app.od_model)
-            return_json = predict_card.main(image=image)
-            return return_json
+            bs64_img = request.json.get('image', '')
+            if sys.getsizeof(bs64_img) < config.IMG_MAX_UPLOAD_SIZE:
+                response = self._get_card_object(bs64_img)
+            else:
+                # Upload smaller image.
+                response = {
+                    "error": {
+                        "msg": f"Upload images of size <="
+                                " {config.IMG_MAX_UPLOAD_SIZE/(1024*1024)} MB.",
+                        "code": 1002
+                    }
+                }
 
         except Exception as ex:
             error_msg = f"Unhandled Error, failed to process the request: {ex}"
             logger.error(error_msg)
-
             response = {
                 "error": {
                     "msg": error_msg,
@@ -49,8 +74,29 @@ class PredictJson(Resource):
                 },
                 "card_json": None
             }
-            return response
 
+        return response
+
+
+class TfPredictJson(PredictJson):
+    """
+    Serve the card prediction using tf-serving service.
+    """
+    def __init__(self, *args, **kwargs):
+        self.model_name = config.TF_SERVING_MODEL_NAME
+        self.tf_server = config.TF_SERVING_URL
+        super(PredictJson, self).__init__(*args, **kwargs)
+
+    def _get_card_object(self, bs64_img: str):
+        """
+        From base64 image generate adaptive card schema.
+
+        Using TF serving to do the object detection.
+        """
+        pic2card = PredictCard(None)
+        card = pic2card.tf_serving_main(bs64_img, self.tf_server,
+                                        self.model_name)
+        return card
 
 
 class GetCardTemplates(Resource):

@@ -10,7 +10,7 @@ import argparse
 import sys
 import os
 
-from mystique.utils.predict_card import PredictCard
+from mystique.predict_card import PredictCard
 import os
 from PIL import Image
 import sys

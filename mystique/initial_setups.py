@@ -6,9 +6,9 @@ import tensorflow as tf
 from object_detection.utils import label_map_util
 
 model_path = os.path.join(os.path.dirname(__file__),
-                          "../../model/frozen_inference_graph.pb")
+                          "../model/frozen_inference_graph.pb")
 label_path = os.path.join(os.path.dirname(__file__),
-                          "../training/object-detection.pbtxt")
+                          "training/object-detection.pbtxt")
 
 
 def set_graph_and_tensors():
@@ -23,8 +23,8 @@ def set_graph_and_tensors():
     detection_graph = tf.Graph ()
     #setting up default graph with graphs from inference graph
     with detection_graph.as_default() as default_graph:
-        od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile (model_path, "rb") as fid:
+        od_graph_def = tf.compat.v1.GraphDef()
+        with tf.compat.v1.gfile.GFile (model_path, "rb") as fid:
             serialized_graph = fid.read()
             od_graph_def.ParseFromString (serialized_graph)
             tf.import_graph_def (od_graph_def, name="")

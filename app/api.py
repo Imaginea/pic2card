@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_restplus import Api
 from . import resources as res
 
-from mystique.utils.initial_setups import set_graph_and_tensors
+from mystique.initial_setups import set_graph_and_tensors
 from mystique.detect_objects import ObjectDetection
 
 logger = logging.getLogger("mysitque")
@@ -31,8 +31,8 @@ api = Api(app, title="Mystique", version="1.0", default="Jobs", default_label=""
           description="Mysique App For Adaptive card Json Prediction from UI Design")
 
 api.add_resource(res.PredictJson, '/predict_json',  methods=['POST'])
+api.add_resource(res.TfPredictJson, '/tf_predict_json',  methods=['POST'])
 api.add_resource(res.GetCardTemplates, '/get_card_templates',  methods=['GET'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5050, debug=False)
-

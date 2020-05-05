@@ -3,16 +3,20 @@
 import json
 import os
 import sys
+from typing import Dict, List
+import base64
+import io
 
 import cv2
 from PIL import Image
+import numpy as np
+import requests
 
 from mystique.arrange_card import CardArrange
 from mystique.detect_objects import ObjectDetection
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
-import numpy as np
-
+from mystique import config
 
 class PredictCard:
 
@@ -103,9 +107,52 @@ class PredictCard:
         image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # Extract the design objects from faster rcnn model
         output_dict, category_index = self.od_model.get_objects(image=image_np)
+        return self.generate_card(output_dict, image, image_np)
+
+    def tf_serving_main(self, bs64_img: str, tf_server:str,
+                        model_name: str) -> Dict:
+        tf_uri = os.path.join(tf_server, f"v1/models/{model_name}:predict")
+        payloads = {
+            "signature_name": "serving_default",
+            "instances": [
+                {"b64": bs64_img}
+            ]
+        }
+
+        # Hit the tf-serving and get the prediction
+        response = requests.post(tf_uri, json=payloads)
+        pred_res = json.loads(response.content)["predictions"][0]
+
+        filtered_res = {}
+        for key_col in ['detection_boxes', 'detection_scores',
+                       'detection_classes']:
+            filtered_res[key_col] = np.array(pred_res[key_col])
+
+        # Prepare the card from object detection.
+        pic2card = PredictCard(None)
+        imgdata = base64.b64decode(bs64_img)
+        image = Image.open(io.BytesIO(imgdata))
+        image = image.convert("RGB")
+        image_np = np.asarray(image)
+        image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+        card = pic2card.generate_card(filtered_res, image, image_np)
+        return card
+
+
+    def generate_card(self, prediction: Dict, image: Image, image_np: np.array):
+        """
+        From the object detection result and image, generate adaptive card object.
+
+        @param prediction: Prediction result from rcnn model
+        @param image: PIL Image object to crop the regions.
+        @param image_np: Array representation of the image.
+
+        """
+        #TODO: Remove the reduendant usage of image and image_np
+
         # Collect the objects along with its design properites
         json_objects, detected_coords = self.collect_objects(
-            output_dict=output_dict, pil_image=image)
+            output_dict=prediction, pil_image=image)
         # Detect image coordinates inside the card design
         image_extraction=ImageExtraction()
         image_points = image_extraction.detect_image(
