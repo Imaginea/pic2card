@@ -20,7 +20,7 @@ from mystique import config
 
 class PredictCard:
 
-    def __init__(self, od_model):
+    def __init__(self, od_model=None):
         """
         Find the card components using Object detection model
         """
