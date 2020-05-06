@@ -273,6 +273,7 @@ class CardArrange:
                     "horizontalAlignment": design_object.get ("horizontal_alignment", ""),
                     "color": design_object.get ("color", "Default"),
                     "weight": design_object.get ("weight", ""),
+                    "wrap":"true",
                     })
                 if ymins is not None:
                     ymins.append(design_object.get ("ymin"))
