@@ -2,17 +2,13 @@
 Command to predict the adaptive card json
 
 Usage :
-python generate_card.py --image_path=/path/to/input/image
-                        --frozen_graph_path=model/frozen_inference_graph.pb
+python -m command.generate_card --image_path=/path/to/input/image \
+                        --frozen_graph_path=model/frozen_inference_graph.pb \
                         --labels_path=mystique/training/object-detection.pbtxt
 """
 import argparse
-import sys
-import os
 import json
-import numpy as np
 from PIL import Image
-from flask import current_app
 
 from mystique.detect_objects import ObjectDetection
 from mystique.predict_card import PredictCard
