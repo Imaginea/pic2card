@@ -10,7 +10,6 @@ import argparse
 import sys
 import os
 import json
-
 import numpy as np
 from PIL import Image
 from flask import current_app
