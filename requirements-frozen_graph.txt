@@ -1,0 +1,4 @@
+# To serve from frozen graph you have to install the tf core libraries.
+# It comes close to 1.7GB
+tensorflow==1.15.0
+tensorflow-object-detection-api==0.1.1

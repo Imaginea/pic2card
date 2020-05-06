@@ -13,10 +13,10 @@ import numpy as np
 import requests
 
 from mystique.arrange_card import CardArrange
-from mystique.detect_objects import ObjectDetection
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
 from mystique import config
+
 
 class PredictCard:
 
