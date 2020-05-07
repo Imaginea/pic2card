@@ -63,7 +63,3 @@ RUN pip install -r requirements.txt && \
 
 EXPOSE $PORT
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-#ENTRYPOINT ["python", "-m", "app.api"]
-#ENTRYPOINT ["gunicorn", "-w", "2", "-b", "0.0.0.0:$PORT", "app.api:app"]
-#gunicorn -w 2 -b 0.0.0.0:5051 app.api:
