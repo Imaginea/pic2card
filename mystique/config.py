@@ -13,3 +13,5 @@ TF_SERVING_URL = os.environ.get("TF_SERVING_URL",
 TF_SERVING_MODEL_NAME = "mystique"
 ENABLE_TF_SERVING = os.environ.get("ENABLE_TF_SERVING",
                                    False)
+IMG_MAX_HOSTING_SIZE=1000000
+DEFAULT_IMG_HOSTING="https://lh3.googleusercontent.com/-snm-WznsB3k/XrAWKVCBC3I/AAAAAAAAB8Y/tR-2f8CzboQCmyTzrAfj9Xtvnbeh9PJ8QCK8BGAsYHg/s0/2020-05-04.png"
