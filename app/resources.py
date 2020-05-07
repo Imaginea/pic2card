@@ -5,6 +5,7 @@ import io
 import base64
 import json
 import logging
+from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 import cv2
@@ -19,10 +20,10 @@ from mystique import config
 from .utils import get_templates
 
 
-logger = logging.getLogger('mysitque')
+logger = logging.getLogger("mysitque")
 
 cur_dir = os.path.dirname(__file__)
-input_image_collection = os.path.join(cur_dir, 'input_image_collection')
+input_image_collection = os.path.join(cur_dir, "input_image_collection")
 model_path = os.path.join(os.path.dirname(__file__),
                           "../model/frozen_inference_graph.pb")
 label_path = os.path.join(os.path.dirname(__file__),
@@ -33,7 +34,7 @@ class PredictJson(Resource):
     """
     Handling Adaptive Card Predictions
     """
-    def _get_card_object(self, bs64_img: str):
+    def _get_card_object(self, bs64_img: str, card_format: str):
         """
         From base64 image generate adaptive card schema.
 
@@ -42,7 +43,7 @@ class PredictJson(Resource):
         imgdata = base64.b64decode(bs64_img)
         image = Image.open(io.BytesIO(imgdata))
         predict_card = PredictCard(current_app.od_model)
-        card = predict_card.main(image=image)
+        card = predict_card.main(image=image, card_format=card_format)
         return card
 
     def post(self):
@@ -51,9 +52,10 @@ class PredictJson(Resource):
         :return: adaptive card json
         """
         try:
-            bs64_img = request.json.get('image', '')
+            card_format=parse_qs(urlparse(request.url).query).get("format",[None])[0]
+            bs64_img = request.json.get("image", "")
             if sys.getsizeof(bs64_img) < config.IMG_MAX_UPLOAD_SIZE:
-                response = self._get_card_object(bs64_img)
+                response = self._get_card_object(bs64_img, card_format)
             else:
                 # Upload smaller image.
                 response = {
@@ -87,7 +89,7 @@ class TfPredictJson(PredictJson):
         self.tf_server = config.TF_SERVING_URL
         super(PredictJson, self).__init__(*args, **kwargs)
 
-    def _get_card_object(self, bs64_img: str):
+    def _get_card_object(self, bs64_img: str, card_format: str):
         """
         From base64 image generate adaptive card schema.
 
@@ -95,7 +97,7 @@ class TfPredictJson(PredictJson):
         """
         pic2card = PredictCard(None)
         card = pic2card.tf_serving_main(bs64_img, self.tf_server,
-                                        self.model_name)
+                                        self.model_name, card_format)
         return card
 
 

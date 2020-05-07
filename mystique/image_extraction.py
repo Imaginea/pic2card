@@ -6,8 +6,11 @@ from io import BytesIO
 import math
 import numpy as np
 import os
+import sys
 from os import environ
 import requests
+
+from mystique import config
 
 
 class ImageExtraction:
@@ -154,10 +157,10 @@ class ImageExtraction:
             base64_string = base64.b64encode(buff.getvalue()).decode()
             images_urls.append(f"data:image/png;base64,{base64_string}")
             
-            size=(len(base64_string) * 3 / 4) - base64_string.count('=', -2)
-            if size>=1000000:
-                images_urls.append('https://lh3.googleusercontent.com/-snm-WznsB3k/XrAWKVCBC3I/AAAAAAAAB8Y/tR-2f8CzboQCmyTzrAfj9Xtvnbeh9PJ8QCK8BGAsYHg/s0/2020-05-04.png')
+            #Place default image holder if image object size is greater than 1MB
+            size=sys.getsizeof(base64_string)
+            if size>=config.IMG_MAX_HOSTING_SIZE:
+                images_urls.append(config.DEFAULT_IMG_HOSTING)
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")
         return images_urls, images_sizes
-        
