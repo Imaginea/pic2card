@@ -179,7 +179,7 @@ class PredictCard:
             template=Template()
             template_payload=template.build_template_data_payload(json_objects["objects"])
             return_dict["card_v2_json"]={}.fromkeys(["data","template"],{})
-            return_dict["card_v2_json"]["template"]=template_payload
+            return_dict["card_v2_json"]["data"]=template_payload
 
         body, ymins = card_arrange.build_card_json(
             objects=json_objects.get("objects", []))
@@ -199,7 +199,7 @@ class PredictCard:
         if card_format!="template":
             return_dict["card_json"] = card_json
         else:
-            return_dict["card_v2_json"]["data"]=card_json
+            return_dict["card_v2_json"]["template"]=card_json
             return_dict["card_json"]=None
         return_dict["error"] = error
 
