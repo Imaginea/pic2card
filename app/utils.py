@@ -12,8 +12,12 @@ def get_templates(templates_path='assets/samples'):
 
     templates = []
     templates_path = os.path.join(os.path.dirname(__file__), templates_path)
-    for file in os.listdir(templates_path):
-        file_path = os.path.join(templates_path, file)
+
+    # List.dir performs differently in docker environment.
+    files = os.listdir(templates_path)
+    files.sort()
+    for f in files:
+        file_path = os.path.join(templates_path, f)
         with open(file_path, "rb") as template:
             templates.append(base64.b64encode(template.read()).decode())
     return {"templates":templates}
