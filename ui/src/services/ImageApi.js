@@ -21,11 +21,11 @@ export default {
         let data = {
             image: base64_image
         }
-        config = {
+        let config = {
             header: {
-                'Content-Type': 'image/png'
+                'Content-Type': 'application/json'
             }
         }
-        return apiClient.post('/predict_json', data)
+        return apiClient.post('/predict_json', data, config)
     }
 }

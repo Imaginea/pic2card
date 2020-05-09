@@ -25,8 +25,9 @@ export default {
     mounted() {
         // console.log('working..')
         getTemplateImages.getTemplateImages().then(response => {
-            this.base64_images = response.data['templates']
-            // this.base64_images = ['hello..fromhome']
+            let cards = response.data['templates']
+            // this.base64_images = [cards[0], cards[1], cards[2]]
+            this.base64_images = cards
             // console.log(this.base64_images)
         })
     }
