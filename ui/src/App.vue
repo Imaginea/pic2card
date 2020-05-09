@@ -1,6 +1,6 @@
 <template>
     <v-app>
-        <v-app-bar app color="light-blue accent-2 dark">
+        <v-app-bar app color="blue-grey">
             <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
             <v-toolbar-title>Pic2Card</v-toolbar-title>
@@ -12,6 +12,7 @@
                 :key="`${link.label}-app-bar`"
                 text
                 rounded
+                color="white"
                 :to="link.url"
             >
                 {{ link.label }}
@@ -44,7 +45,7 @@
             <router-view></router-view>
         </v-content>
 
-        <v-footer color="light-blue accent-2">
+        <v-footer color="blue-grey">
             <v-layout justify-center wrap>
                 <v-btn
                     v-for="link in links"
@@ -57,9 +58,9 @@
                 >
                     {{ link.label }}
                 </v-btn>
-                <v-flex light-blue accent-2 py-4 text-center white--text xs12>
+                <v-flex blue-grey py-4 text-center white--text xs12>
                     {{ new Date().getFullYear() }} —
-                    <strong>Mercari ML</strong>
+                    <strong>Pic2Card</strong>
                 </v-flex>
             </v-layout>
         </v-footer>
