@@ -81,19 +81,7 @@ export default {
             {
                 label: 'Home',
                 url: '/'
-            },
-            {
-                label: 'Dashboard',
-                url: '/dashboard'
             }
-            // {
-            //     label: 'Image Search',
-            //     url: '/image-search'
-            // },
-            // {
-            //     label: 'Text Search',
-            //     url: '/text-search'
-            // }
         ]
     })
 }
