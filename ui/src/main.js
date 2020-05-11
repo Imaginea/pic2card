@@ -9,6 +9,8 @@ import vuetify from './plugins/vuetify'
 Vue.config.productionTip = false
 
 // Vue.component('upload-image', UploadImage)
+import VueKonva from 'vue-konva'
+Vue.use(VueKonva)
 
 new Vue({
     router,

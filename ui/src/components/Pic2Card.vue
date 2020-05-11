@@ -5,7 +5,7 @@
                 <p ref="cards"></p>
             </v-col>
             <v-col>
-                <v-img
+                <!-- <v-img
                     :src="image_data_url"
                     lazy-src="https://picsum.photos/510/300?random"
                     aspect-ratio="1"
@@ -19,7 +19,8 @@
                             <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
                         </v-row>
                     </template>
-                </v-img>
+                </v-img>-->
+                <ImageCanvase imaeg_url="image_data_url" />
             </v-col>
         </v-row>
     </v-container>
@@ -28,12 +29,17 @@
 <script>
 import * as AdaptiveCards from 'adaptivecards'
 import AdaptiveCardApi from '@/services/ImageApi.js'
+import ImageCanvase from '@/components/ImageCanvas.vue'
+
 import axios from 'axios'
 
 export default {
     name: 'Pic2Card',
     props: {
         base64_image: String
+    },
+    components: {
+        ImageCanvase
     },
     data() {
         return {

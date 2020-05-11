@@ -17,6 +17,7 @@ export default {
     components: {
         Pic2Card
     },
+
     data() {
         return {
             base64_images: []
@@ -26,8 +27,8 @@ export default {
         // console.log('working..')
         getTemplateImages.getTemplateImages().then(response => {
             let cards = response.data['templates']
-            // this.base64_images = [cards[0], cards[1], cards[2]]
-            this.base64_images = cards
+            this.base64_images = [cards[0], cards[1], cards[2]]
+            // this.base64_images = cards
             // console.log(this.base64_images)
         })
     }
