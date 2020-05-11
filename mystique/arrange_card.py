@@ -252,8 +252,8 @@ class CardArrange:
             if ymins is not None:
                 ymins.append(design_object.get("ymin"))
         if design_object.get("object") == "textbox":
-            if (len(design_object.get("text", "").split()) >= 11 and not is_column) or (
-                    is_column and len(design_object.get ("text", "")) >= 15):
+            if (len(design_object.get("data", "").split()) >= 11 and not is_column) or (
+                    is_column and len(design_object.get ("data", "")) >= 15):
                 body.append ({
                     "type": "RichTextBlock",
                     "inlines": [{
@@ -262,7 +262,7 @@ class CardArrange:
                         "size": design_object.get ("size", ""),
                         "horizontalAlignment": design_object.get ("horizontal_alignment", ""),
                         "color": design_object.get ("color", "Default"),
-                        "weight": design_object.get ("weight", "")
+                        "weight": design_object.get ("weight", ""),
                         }]})
                 if ymins is not None:
                     ymins.append(design_object.get ("ymin"))
@@ -335,27 +335,22 @@ class CardArrange:
                     "type": "ColumnSet",
                     "columns": []
                     }
-                ctr = 0
                 group = sorted (group, key=lambda i: i["xmin"])
-                for obj in group:
-
+                for ctr,obj in enumerate(group):
+    
                     colummn_set["columns"].append({
                         "type": "Column",
                         "width": "stretch",
                         "items": []
                         })
-                    position = group.index(obj)
-                    if position + 1 < len(group):
-                        greater = position
-                        lesser = position + 1
-                        if float(obj.get("ymin")) < float(
-                                group[position + 1].get("ymin")):
-                            greater = position + 1
-                            lesser = position
 
-                        if abs(float(group[greater].get("xmax")) 
-                               -float(group[lesser].get("xmin"))) <= 10:
-                            colummn_set["columns"][ctr]["width"] = "auto"
+                    #if x distance between 2 columns is <=50 pixels the spacing is given as auto
+                    if ctr+1<len(group) and \
+                        float(group[ctr+1].get("xmin")) - float(group[ctr].get("xmax")) <= 50:
+                        colummn_set["columns"][ctr]["width"] = "auto"
+                    #if the y distance or the height of the last column object is >=50 pixels the spacing is given as auto
+                    if ctr==len(group)-1 and float(group[ctr].get('ymax')) - float(group[ctr].get('ymin')) >=50:
+                        colummn_set["columns"][ctr]["width"]= "auto"
 
                     if obj.get("object") == "radiobutton":
                         radio_buttons_dict["columnset"] = \
@@ -367,7 +362,6 @@ class CardArrange:
                             obj, colummn_set["columns"][ctr].get(
                                 "items", []), is_column=True)
 
-                    ctr += 1
 
                 if len(radio_buttons_dict["columnset"]) > 0:
                     if ctr - 1 != -1 and \
