@@ -1,9 +1,9 @@
-"""Module to generate template data payload for the card design payload"""
+"""Module to generate data binding payload for the card design payload"""
 
 import json
 from typing import Dict, List
 
-class Template:
+class DataBinding:
 
     
     def int_to_roman(self, number: int):
@@ -33,32 +33,32 @@ class Template:
 
         @return: dict of design objects data mapping
         """
-        template_object_map={}.fromkeys(\
+        data_object_map={}.fromkeys(\
             ["textbox","actionset","checkbox","radiobutton","image"])
         for deisgn_object in objects:
             key=deisgn_object.get("object","")
-            if not template_object_map.get(key):
+            if not data_object_map.get(key):
                 roman=self.int_to_roman(1)
-                template_object_map[key]=[(deisgn_object.get("data"),roman)]
+                data_object_map[key]=[(deisgn_object.get("data"),roman)]
                 deisgn_object["data"]="{"+key+"_"+roman+"}"
             else:
-                roman=self.int_to_roman(len(template_object_map[key])+1)
-                template_object_map[key].append((deisgn_object.get("data"),roman))
+                roman=self.int_to_roman(len(data_object_map[key])+1)
+                data_object_map[key].append((deisgn_object.get("data"),roman))
                 deisgn_object["data"]="{"+key+"_"+roman+"}"
-        return template_object_map
+        return data_object_map
 
-    def build_template_data_payload(self, objects: List[Dict]):
+    def build_data_binding_payload(self, objects: List[Dict]):
 
         """
-        Build the template data payload from the design objects
+        Build the data binding payload from the design objects
 
         @param objects: list of deisgn objects
 
-        @return: template data payload json
+        @return: data binding payload json
         """
-        template_object_map=self.generate_object_data_mapping(objects)
+        data_object_map=self.generate_object_data_mapping(objects)
         data_payload={}
-        for key,value in template_object_map.items():
+        for key,value in data_object_map.items():
             if value:
                 for data in value:
                     if len(data)>1:
