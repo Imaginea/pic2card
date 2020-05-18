@@ -29,18 +29,12 @@
 import * as AdaptiveCards from 'adaptivecards'
 import AdaptiveCardApi from '@/services/ImageApi.js'
 import Config from '@/components/config.js'
-import ImageCanvase from '@/components/ImageCanvas.vue'
-
-import axios from 'axios'
 
 export default {
     name: 'Pic2Card',
     props: {
         base64_image: String
     },
-    // components: {
-    //     ImageCanvase
-    // },
     data() {
         return {
             image_str: this.base64_image,
@@ -56,7 +50,7 @@ export default {
     methods: {
         pic2Card(base64_image) {
             AdaptiveCardApi.getAdaptiveCard(base64_image).then(response => {
-                console.log(response.data)
+                // console.log(response.data)
                 let card_json = response.data['card_json']
                 // Initialize the adaptive card.
                 let adaptiveCard = new AdaptiveCards.AdaptiveCard()
@@ -72,9 +66,7 @@ export default {
             })
         },
         renderCard() {
-            console.log('asdfasdf')
             AdaptiveCardApi.getAdaptiveCard(this.image_str).then(response => {
-                console.log(response.data)
                 this.card_json = response.data['card_json']
             })
         }

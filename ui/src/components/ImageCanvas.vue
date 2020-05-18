@@ -38,7 +38,7 @@ export default {
         image.src = this.image_url
         image.onload = () => {
             this.image = image
-            console.log(image.width)
+            //console.log(image.width)
             this.stageSize.width = image.width
             this.stageSize.height = image.height
         }

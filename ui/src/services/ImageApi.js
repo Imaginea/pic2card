@@ -33,6 +33,8 @@ export default {
             }
         }
 
+        // Creating fresh client instance to handle the request, as
+        // latency of this endpoint is higher.
         return axios({
             method: 'post',
             url: baseURL + '/predict_json_debug',
@@ -42,6 +44,5 @@ export default {
                 'Content-Type': 'application/json'
             }
         })
-        //return apiClient.post('/predict_json_debug', data, config)
     }
 }
