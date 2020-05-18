@@ -20,6 +20,9 @@ export default {
         return apiClient.get('/get_card_templates')
     },
 
+    /**
+     * @param {any} base64_image
+     */
     getAdaptiveCard(base64_image) {
         let data = {
             image: base64_image
