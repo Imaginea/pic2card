@@ -15,6 +15,7 @@ import requests
 from mystique.arrange_card import CardArrange
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
+from mystique.generate_template_data_payload import DataBinding
 from mystique import config
 
 
@@ -56,7 +57,7 @@ class PredictCard:
                 elif str(classes[i]) == "3":
                     object_json["object"] = "checkbox"
                 elif str(classes[i]) == "4":
-                    object_json['object']="actionset"
+                    object_json["object"]="actionset"
 
                 ymin = boxes[i][0] * height
                 xmin = boxes[i][1] * width
@@ -85,12 +86,12 @@ class PredictCard:
                                                        coords=(xmin, ymin, xmax, ymax))
                 else:
                     detected_coords.append((xmin, ymin, xmax, ymax))
-                object_json["text"] = extract_properties.get_text(
+                object_json["data"] = extract_properties.get_text(
                     image=pil_image, coords=(xmin, ymin, xmax, ymax))
                 json_object["objects"].append(object_json)
         return json_object, detected_coords
 
-    def main(self, image=None):
+    def main(self, image=None, card_format=None):
 
         """
         Handles the different components calling and returns the
@@ -102,15 +103,15 @@ class PredictCard:
 
         @return: predicted card json
         """
-        image=image.convert('RGB')
+        image=image.convert("RGB")
         image_np = np.asarray(image)
         image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # Extract the design objects from faster rcnn model
         output_dict, category_index = self.od_model.get_objects(image=image_np)
-        return self.generate_card(output_dict, image, image_np)
+        return self.generate_card(output_dict, image, image_np, card_format)
 
     def tf_serving_main(self, bs64_img: str, tf_server:str,
-                        model_name: str) -> Dict:
+                        model_name: str, card_format: str) -> Dict:
         tf_uri = os.path.join(tf_server, f"v1/models/{model_name}:predict")
         payloads = {
             "signature_name": "serving_default",
@@ -124,8 +125,8 @@ class PredictCard:
         pred_res = json.loads(response.content)["predictions"][0]
 
         filtered_res = {}
-        for key_col in ['detection_boxes', 'detection_scores',
-                       'detection_classes']:
+        for key_col in ["detection_boxes", "detection_scores",
+                       "detection_classes"]:
             filtered_res[key_col] = np.array(pred_res[key_col])
 
         # Prepare the card from object detection.
@@ -135,11 +136,11 @@ class PredictCard:
         image = image.convert("RGB")
         image_np = np.asarray(image)
         image_np=cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-        card = pic2card.generate_card(filtered_res, image, image_np)
+        card = pic2card.generate_card(filtered_res, image, image_np, card_format)
         return card
 
 
-    def generate_card(self, prediction: Dict, image: Image, image_np: np.array):
+    def generate_card(self, prediction: Dict, image: Image, image_np: np.array, card_format: str):
         """
         From the object detection result and image, generate adaptive card object.
 
@@ -172,6 +173,14 @@ class PredictCard:
         return_dict = {}.fromkeys(["card_json"], "")
         card_json = {"type": "AdaptiveCard", "version": "1.0", "body": [
         ], "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"}
+
+        #if format==template - generate template data json
+        if card_format=="template":
+            databinding=DataBinding()
+            data_payload=databinding.build_data_binding_payload(json_objects["objects"])
+            return_dict["card_v2_json"]={}.fromkeys(["data","template"],{})
+            return_dict["card_v2_json"]["data"]=data_payload
+
         body, ymins = card_arrange.build_card_json(
             objects=json_objects.get("objects", []))
         # Sort the elements vertically
@@ -187,7 +196,11 @@ class PredictCard:
         else:
             card_json["body"] = body
 
-        return_dict["card_json"] = card_json
+        if card_format!="template":
+            return_dict["card_json"] = card_json
+        else:
+            return_dict["card_v2_json"]["template"]=card_json
+            return_dict["card_json"]=None
         return_dict["error"] = error
 
         return return_dict

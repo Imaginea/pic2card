@@ -1,4 +1,5 @@
 """Flask service to predict the adaptive card json from the card design"""
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
@@ -12,6 +13,9 @@ from mystique.detect_objects import ObjectDetection
 
 logger = logging.getLogger("mysitque")
 logger.setLevel(logging.DEBUG)
+
+# Suppress the tf warnings.
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 
 file_handler = RotatingFileHandler(
     'mystique_app.log', maxBytes=1024 * 1024 * 100, backupCount=20)
