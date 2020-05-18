@@ -15,8 +15,15 @@
                     contain
                 >
                     <template v-slot:placeholder>
-                        <v-row class="fill-height ma-0" align="center" justify="center">
-                            <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+                        <v-row
+                            class="fill-height ma-0"
+                            align="center"
+                            justify="center"
+                        >
+                            <v-progress-circular
+                                indeterminate
+                                color="grey lighten-5"
+                            ></v-progress-circular>
                         </v-row>
                     </template>
                 </v-img>
@@ -29,6 +36,7 @@
 import * as AdaptiveCards from 'adaptivecards'
 import AdaptiveCardApi from '@/services/ImageApi.js'
 import Config from '@/components/config.js'
+import MarkdownIt from 'markdown-it'
 
 export default {
     name: 'Pic2Card',
@@ -52,11 +60,22 @@ export default {
             AdaptiveCardApi.getAdaptiveCard(base64_image).then(response => {
                 // console.log(response.data)
                 let card_json = response.data['card_json']
-                // Initialize the adaptive card.
+
+                // Add markdown rendering.
+                AdaptiveCards.AdaptiveCard.onProcessMarkdown = function(
+                    text,
+                    result
+                ) {
+                    let md = new MarkdownIt()
+                    result.outputHtml = md.render(text)
+                    result.didProcess = true
+                }
+
                 let adaptiveCard = new AdaptiveCards.AdaptiveCard()
                 adaptiveCard.hostConfig = new AdaptiveCards.HostConfig(
                     Config.adaptiveHostConfig
                 )
+
                 adaptiveCard.parse(card_json)
                 this.card_html = adaptiveCard.render()
                 this.$refs.cards.appendChild(this.card_html)
