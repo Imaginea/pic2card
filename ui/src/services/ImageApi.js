@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const baseURL = 'http://172.17.0.5:5050'
+
 const apiClient = axios.create({
-    baseURL: 'http://172.17.0.5:5050',
+    baseURL: baseURL,
     withCredentials: false,
     headers: {
         Accept: 'application/json',
@@ -17,6 +19,7 @@ export default {
     getTemplateImages() {
         return apiClient.get('/get_card_templates')
     },
+
     getAdaptiveCard(base64_image) {
         let data = {
             image: base64_image
@@ -26,6 +29,16 @@ export default {
                 'Content-Type': 'application/json'
             }
         }
-        return apiClient.post('/predict_json', data, config)
+
+        return axios({
+            method: 'post',
+            url: baseURL + '/predict_json_debug',
+            timeout: 200000,
+            data: { image: base64_image },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        //return apiClient.post('/predict_json_debug', data, config)
     }
 }

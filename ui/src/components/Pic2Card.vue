@@ -5,7 +5,7 @@
                 <p ref="cards"></p>
             </v-col>
             <v-col>
-                <!-- <v-img
+                <v-img
                     :src="image_data_url"
                     lazy-src="https://picsum.photos/510/300?random"
                     aspect-ratio="1"
@@ -19,8 +19,7 @@
                             <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
                         </v-row>
                     </template>
-                </v-img>-->
-                <ImageCanvase imaeg_url="image_data_url" />
+                </v-img>
             </v-col>
         </v-row>
     </v-container>
@@ -38,9 +37,9 @@ export default {
     props: {
         base64_image: String
     },
-    components: {
-        ImageCanvase
-    },
+    // components: {
+    //     ImageCanvase
+    // },
     data() {
         return {
             image_str: this.base64_image,
@@ -55,15 +54,7 @@ export default {
     },
     methods: {
         pic2Card(base64_image) {
-            axios({
-                method: 'post',
-                url: 'http://172.17.0.5:5050/predict_json',
-                timeout: 200000,
-                data: { image: base64_image },
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => {
+            AdaptiveCardApi.getAdaptiveCard(base64_image).then(response => {
                 console.log(response.data)
                 let card_json = response.data['card_json']
                 // Initialize the adaptive card.
@@ -344,6 +335,9 @@ export default {
                 adaptiveCard.parse(card_json)
                 this.card_html = adaptiveCard.render()
                 this.$refs.cards.appendChild(this.card_html)
+
+                // Also update the image that has bounding box.
+                this.image_str = response.data['image']
             })
         },
         renderCard() {
