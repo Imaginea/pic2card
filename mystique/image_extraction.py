@@ -51,6 +51,92 @@ class ImageExtraction:
             else:
                 return False
 
+    def get_image_with_boundary_boxes(self, image=None, detected_coords=None,
+                                      pil_image=None, faster_rcnn_image=None):
+        """
+        Returns the Detected image object boundary boxes along with
+        faster rcnn detected boxes.
+
+        @param image: input open-cv image
+        @param detected_coords: list of detected 
+                                   object's coordinates from faster rcnn model
+        @param pil_image: Input PIL image
+        @param faster_rcnn_image: image with faster rcnn detected object's
+        boundary boxes
+
+        @return: detected obejct's boundary detection base64 string
+        """
+        image_points = []
+        # pre processing
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        dst = cv2.equalizeHist(gray)
+        blur = cv2.GaussianBlur(dst, (5, 5), 0)
+        ret, im_th = cv2.threshold(blur, 150, 255, cv2.THRESH_BINARY)
+        # Set the kernel and perform opening
+        # k_size = 6
+        kernel = np.ones((5, 5), np.uint8)
+        opened = cv2.morphologyEx(im_th, cv2.MORPH_OPEN, kernel)
+        # edge detection
+        edged = cv2.Canny(opened, 0, 255)
+        # countours
+        _, contours, hierarchy = cv2.findContours(
+            edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # get the coords of the contours
+        for c in contours:
+            (x, y, w, h) = cv2.boundingRect(c)
+            image_points.append((x, y, x + w, y + h))
+
+        for i in range(len(image_points)):
+            for j in range(len(image_points)):
+                if j < len(image_points) and i < len(image_points):
+                    box1 = [float(c) for c in image_points[i]]
+                    box2 = [float(c) for c in image_points[j]]
+                    intersection = self.find_points(box1, box2, for_image=True)
+                    contain = (float(box2[0]) <= box1[0] + 5 <= float(box2[2])
+                               ) and (float(box2[1]) <= box1[1] + 5 <= float(box2[3]))
+                    if intersection or contain:
+                        if box1 != box2:
+                            if box1[2] - box1[0] > box2[2] - box2[0]:
+                                del image_points[j]
+                            else:
+                                del image_points[i]
+
+        # extarct the points that lies inside the detected objects coords [
+        # rectangle ]
+        included_points_positions = [0] * len(image_points)
+        for point in image_points:
+            for p in detected_coords:
+                contain = (float(p[0]) <= point[0] + 5 <= float(p[2])
+                           ) and (float(p[1]) <= point[1] + 5 <= float(p[3]))
+                if contain:
+                    included_points_positions[image_points.index(point)] = 1
+        # now get the image points / coords that lies outside the detected
+        # objects coords
+        image_points1 = []
+        for point in image_points:
+            if included_points_positions[image_points.index(point)] != 1:
+                image_points1.append(point)
+        image_points = sorted(set(image_points1), key=image_points1.index)
+        # =image_points[:-1]
+        width, height = pil_image.size
+        widths = [point[2] - point[0] for point in image_points]
+        heights = [point[3] - point[1] for point in image_points]
+        if widths and heights:
+            position_w = widths.index(max(widths))
+            position_h = heights.index(max(heights))
+            if ((max(widths)*max(heights)/(width*height)))*100 >= 70.0 and position_h == position_w:
+                del image_points[position_w]
+
+        image_model_base64_string = ''
+        for point in image_points:
+            cv2.rectangle(faster_rcnn_image,
+                          (point[0], point[1]), (point[2], point[3]), (0, 0, 255), 2)
+            retval, image_buffer = cv2.imencode(".png", faster_rcnn_image)
+            image_model_base64_string = base64.b64encode(image_buffer).decode()
+
+        return image_model_base64_string
+
+
     def detect_image(self, image=None , detected_coords=None, pil_image=None):
 
         """
