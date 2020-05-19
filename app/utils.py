@@ -3,6 +3,7 @@ import os
 import base64
 import json
 
+
 def get_templates(templates_path='assets/samples'):
     """
     reads images from templates_path folder and returns images in str
@@ -20,4 +21,4 @@ def get_templates(templates_path='assets/samples'):
         file_path = os.path.join(templates_path, f)
         with open(file_path, "rb") as template:
             templates.append(base64.b64encode(template.read()).decode())
-    return {"templates":templates}
+    return {"templates": templates}

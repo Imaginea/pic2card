@@ -14,9 +14,13 @@ from mystique import config
 
 
 class ImageExtraction:
+    """
+    Class to identify the edges in the design image and filtering out the 
+    faster rcnn objects to obtain the image object boundaries and to add 
+    the cropped out image obejcts as base64 to the card paylaod json.
+    """
 
     def find_points(self, coord1, coord2, for_image=None):
-
         """
         Finds the intersecting bounding boxes by finding
            the highest x and y ranges of the 2 coordinates 
@@ -45,8 +49,7 @@ class ImageExtraction:
             intersection_area = (x6 - x5) * (y6 - y5)
             point1_area = (coord1[2] - coord1[0]) * (coord1[3] - coord1[1])
             point2_area = (coord2[2] - coord2[0]) * (coord2[3] - coord2[1])
-            if intersection_area / point1_area > 0.55 or \
-                intersection_area / point2_area > 0.55:
+            if intersection_area / point1_area > 0.55 or intersection_area / point2_area > 0.55:
                 return True
             else:
                 return False
@@ -146,7 +149,8 @@ class ImageExtraction:
 
         @param image: input open-cv image
         @param detected_coords: list of detected 
-                                   object's coordinates from faster rcnn model
+                                object's coordinates from faster 
+                                rcnn model
         @param pil_image: Input PIL image
 
         @return: list of image points
@@ -176,16 +180,10 @@ class ImageExtraction:
                 if j < len(image_points) and i < len(image_points):
                     box1 = [float(c) for c in image_points[i]]
                     box2 = [float(c) for c in image_points[j]]
-                    intersection = self.find_points(box1, box2, for_image=True)
-                    contain = (
-                        float(
-                            box2[0]) <= box1[0] +
-                        5 <= float(
-                            box2[2])) and (
-                        float(
-                            box2[1]) <= box1[1] +
-                        5 <= float(
-                            box2[3]))
+                    intersection = self.find_points(box1, box2,
+                                                    for_image=True)
+                    contain = (float(box2[0]) <= box1[0] + 5 <= float(box2[2])
+                               ) and (float(box2[1]) <= box1[1] + 5 <= float(box2[3]))
                     if intersection or contain:
                         if box1 != box2:
                             if box1[2] - box1[0] > box2[2] - box2[0]:
@@ -216,14 +214,12 @@ class ImageExtraction:
         if widths and heights:
             position_w = widths.index(max(widths))
             position_h = heights.index(max(heights))
-            if ((max(widths)*max(heights)/(width*height)))*100>=70.0\
-                and position_h==position_w:
+            if ((max(widths)*max(heights)/(width*height)))*100 >= 70.0 and position_h == position_w:
                 del image_points[position_w]
 
         return image_points
 
     def image_crop_get_url(self, coords=None, image=None):
-
         """
         Crops the individual image objects from the input
         design and get the hosted url of the images.
@@ -242,10 +238,11 @@ class ImageExtraction:
             cropped.save(buff, format="PNG")
             base64_string = base64.b64encode(buff.getvalue()).decode()
             images_urls.append(f"data:image/png;base64,{base64_string}")
-            
-            #Place default image holder if image object size is greater than 1MB
-            size=sys.getsizeof(base64_string)
-            if size>=config.IMG_MAX_HOSTING_SIZE:
+
+            # Place default image holder if image object size is greater
+            # than 1MB
+            size = sys.getsizeof(base64_string)
+            if size >= config.IMG_MAX_HOSTING_SIZE:
                 images_urls.append(config.DEFAULT_IMG_HOSTING)
         if os.path.exists("image_detected.png"):
             os.remove("image_detected.png")

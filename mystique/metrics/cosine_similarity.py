@@ -1,4 +1,6 @@
-"""Module to Calculate Cosine similarity between the testing and generated card json"""
+"""Module to Calculate Cosine similarity between the testing and 
+   generated card json
+"""
 import argparse
 import base64
 import json
@@ -10,11 +12,13 @@ import requests
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-model_path = os.path.join(os.path.dirname(__file__), "../model/frozen_inference_graph.pb")
-label_path = os.path.join(os.path.dirname(__file__), "../mystique/training/object-detection.pbtxt")
+model_path = os.path.join(os.path.dirname(__file__),
+                          "../model/frozen_inference_graph.pb")
+label_path = os.path.join(os.path.dirname(__file__),
+                          "../mystique/training/object-detection.pbtxt")
+
 
 def build_generated_card_json(images, path, testing_file_path):
-
     """
     Build the generated card json file from the list of testing images
     by hiting the api and parsing the card body from the response
@@ -32,15 +36,15 @@ def build_generated_card_json(images, path, testing_file_path):
             with open(path+image, "rb") as image_file:
                 base64_string = base64.b64encode(image_file.read()).decode()
             response = PredictCard().main(image_path=path+image,
-                                         frozen_graph_path=model_path,
-                                         labels_path=label_path)
-            content = {"filename": str(image), "card_json": response.json().get("card_json")}
+                                          frozen_graph_path=model_path,
+                                          labels_path=label_path)
+            content = {"filename": str(image), "card_json":
+                       response.json().get("card_json")}
             generated_jsonlines_file.write(json.dumps(content))
             generated_jsonlines_file.write("\n")
 
 
 def get_cosine_sim(*strs):
-
     """
     Returns the cosine similarity score of the
     given 2 strings
@@ -55,7 +59,6 @@ def get_cosine_sim(*strs):
 
 
 def get_vectors(*strs):
-
     """
     Returns the vectorized values of the text
 
@@ -70,10 +73,10 @@ def get_vectors(*strs):
 
 
 def get_jaccard_sim(str1, str2):
-
     """
-    Returns the jaccard similarity between the test and generated card json
-    
+    Returns the jaccard similarity between the test and generated card 
+    json
+
     @param str1: string one
     @param str2: string two
 
@@ -99,7 +102,8 @@ def main(testing_file_path, testing_images_path):
     # Build the json lines of generated card jsons  of the input images
     build_generated_card_json(images, testing_images_path, testing_file_path)
 
-    if os.path.exists(os.path.dirname(testing_file_path)+"/generated_card_json.jl"):
+    if os.path.exists(os.path.dirname(testing_file_path)
+                      + "/generated_card_json.jl"):
         generated_jsonlines = open("generated_card_json.jl", "r").readlines()
         cosine_similarities = {}.fromkeys(images, "")
         jaccard_similarities = {}.fromkeys(images, "")
@@ -126,12 +130,14 @@ def main(testing_file_path, testing_images_path):
 
             print("Cosine Similarities:\n", json.dumps(
                 cosine_similarities, indent=2))
-            print("Average Cosine Similarity:", (sum([float(l) for l in list(
-                cosine_similarities.values())])/len(list(cosine_similarities.values())))*100)
+            print("Average Cosine Similarity:",
+                  (sum([float(l) for l in list(cosine_similarities.values())])
+                   / len(list(cosine_similarities.values())))*100)
             print("Jaccard Similarities:\n", json.dumps(
                 jaccard_similarities, indent=2))
-            print("Average Jaccard Similarity:", (sum([float(l) for l in list(
-                jaccard_similarities.values())])/len(list(jaccard_similarities.values())))*100)
+            print("Average Jaccard Similarity:",
+                  (sum([float(l) for l in list(jaccard_similarities.values())])
+                   / len(list(jaccard_similarities.values())))*100)
 
     else:
         print("Generated card json files not found")
@@ -145,4 +151,4 @@ if __name__ == "__main__":
     parser.add_argument("--testing_images_path", required=True,
                         help="Enter Test Images Folder Path")
     args = parser.parse_args()
-    main(args.testing_file_path,args.testing_images_path)
+    main(args.testing_file_path, args.testing_images_path)
