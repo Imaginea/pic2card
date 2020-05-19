@@ -1,7 +1,8 @@
-""" Module for setting up the tensorflow graphs and tensors for faster rcnn
-object detection
+""" Module for setting up the tensorflow graphs and tensors for faster 
+    rcnn object detection
 """
 import os
+
 import tensorflow as tf
 from object_detection.utils import label_map_util
 
@@ -25,10 +26,10 @@ def set_graph_and_tensors(tensors=("detection_boxes", "detection_scores",
     #setting up default graph with graphs from inference graph
     with detection_graph.as_default() as default_graph:
         od_graph_def = tf.compat.v1.GraphDef()
-        with tf.compat.v1.gfile.GFile (model_path, "rb") as fid:
+        with tf.compat.v1.gfile.GFile(model_path, "rb") as fid:
             serialized_graph = fid.read()
-            od_graph_def.ParseFromString (serialized_graph)
-            tf.import_graph_def (od_graph_def, name="")
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name="")
         ops = default_graph.get_operations()
         all_tensor_names = {output.name for op in ops for output in op.outputs}
         for tensor in tensors:
@@ -38,8 +39,7 @@ def set_graph_and_tensors(tensors=("detection_boxes", "detection_scores",
                     tmp_tensor_name
                 )
 
-    category_index = label_map_util.create_category_index_from_labelmap (
+    category_index = label_map_util.create_category_index_from_labelmap(
         label_path, use_display_name=True)
 
     return detection_graph, category_index, tensor_dict
-

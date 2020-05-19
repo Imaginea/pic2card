@@ -35,6 +35,7 @@ class PredictJson(Resource):
     """
     Handling Adaptive Card Predictions
     """
+
     def _get_card_object(self, bs64_img: str, card_format: str):
         """
         From base64 image generate adaptive card schema.
@@ -53,7 +54,8 @@ class PredictJson(Resource):
         :return: adaptive card json
         """
         try:
-            card_format=parse_qs(urlparse(request.url).query).get("format",[None])[0]
+            card_format = parse_qs(urlparse(request.url).query).get("format",
+                                                                    [None])[0]
             bs64_img = request.json.get("image", "")
             if sys.getsizeof(bs64_img) < config.IMG_MAX_UPLOAD_SIZE:
                 response = self._get_card_object(bs64_img, card_format)
@@ -62,7 +64,7 @@ class PredictJson(Resource):
                 response = {
                     "error": {
                         "msg": f"Upload images of size <="
-                                " {config.IMG_MAX_UPLOAD_SIZE/(1024*1024)} MB.",
+                        " {config.IMG_MAX_UPLOAD_SIZE/(1024*1024)} MB.",
                         "code": 1002
                     }
                 }
@@ -85,6 +87,7 @@ class TfPredictJson(PredictJson):
     """
     Serve the card prediction using tf-serving service.
     """
+
     def __init__(self, *args, **kwargs):
         self.model_name = config.TF_SERVING_MODEL_NAME
         self.tf_server = config.TF_SERVING_URL

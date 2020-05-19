@@ -19,8 +19,9 @@ from mystique.initial_setups import set_graph_and_tensors
 from mystique.predict_card import PredictCard
 from mystique.detect_objects import ObjectDetection
 
-#tf.logging.set_verbosity(tf.logging.ERROR)
+# tf.logging.set_verbosity(tf.logging.ERROR)
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
+
 
 @click.command()
 @click.option("-t", "--tf_server", required=True,
@@ -35,7 +36,6 @@ def inference_graph(tf_server, image, model_name):
     card_ = PredictCard(None)
     with timeit("tf-verving") as t:
         card = card_.tf_serving_main(bs64_img, tf_server, model_name)
-
 
     # Frozen graph implementation.
     img = Image.open(open(image, "rb"))

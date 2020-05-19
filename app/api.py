@@ -20,7 +20,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 file_handler = RotatingFileHandler(
     'mystique_app.log', maxBytes=1024 * 1024 * 100, backupCount=20)
 formatter = logging.Formatter(
-    "%(asctime)s - [%(filename)s:%(lineno)s - %(funcName)20s() ] - %(levelname)s - %(message)s")
+    "%(asctime)s - [%(filename)s:%(lineno)s - %(funcName)20s() ] - \
+    %(levelname)s - %(message)s")
 file_handler.setFormatter(formatter)
 file_handler.setLevel(logging.DEBUG)
 logger.addHandler(file_handler)
@@ -29,14 +30,18 @@ logger.addHandler(file_handler)
 app = Flask(__name__)
 CORS(app)
 
-api = Api(app, title="Mystique", version="1.0", default="Jobs", default_label="",
-          description="Mysique App For Adaptive card Json Prediction from UI Design")
-api.add_resource(res.GetCardTemplates, '/get_card_templates',  methods=['GET'])
+api = Api(app, title="Mystique", version="1.0",
+          default="Jobs", default_label="",
+          description="Mysique App For Adaptive card Json Prediction from \
+                       UI Design")
+api.add_resource(res.GetCardTemplates, '/get_card_templates',
+                 methods=['GET'])
 
 # Conditional loading helps to reduce the bundle size, as we don't need to
 # package the tensorflow.
 if config.ENABLE_TF_SERVING:
-    api.add_resource(res.TfPredictJson, '/tf_predict_json',  methods=['POST'])
+    api.add_resource(res.TfPredictJson, '/tf_predict_json',
+                     methods=['POST'])
 else:
     # Load the model into flask cache
     from mystique.initial_setups import set_graph_and_tensors
