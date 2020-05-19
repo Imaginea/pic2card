@@ -11,15 +11,16 @@ label_path = os.path.join(os.path.dirname(__file__),
                           "training/object-detection.pbtxt")
 
 
-def set_graph_and_tensors():
+def set_graph_and_tensors(tensors=("detection_boxes", "detection_scores",
+                                   "detection_classes")):
     """
     setting up tf graphs and tensors using the trained inference graph
+
+    @param tensors: required tensors from inference graph
+
     :return: detection_graph, category_index, tensor_dict
     """
     tensor_dict = dict()
-    # requred tensors from inference graph
-    tensors = ["detection_boxes", "detection_scores",
-               "detection_classes"]
     detection_graph = tf.Graph ()
     #setting up default graph with graphs from inference graph
     with detection_graph.as_default() as default_graph:

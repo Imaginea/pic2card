@@ -42,4 +42,10 @@ else:
     from mystique.initial_setups import set_graph_and_tensors
     from mystique.detect_objects import ObjectDetection
     app.od_model = ObjectDetection(*set_graph_and_tensors())
-    api.add_resource(res.PredictJson, '/predict_json',  methods=['POST'])
+    api.add_resource(res.PredictJson, '/predict_json', methods=['POST'])
+
+#Debugging Endpoint which returns the set of images from different models
+app.od_model = ObjectDetection(*set_graph_and_tensors(tensors =
+                                ["detection_boxes", "detection_scores",
+                                "detection_classes", "detection_masks"]))
+api.add_resource(res.DebugEndpoint, "/predict_json_debug", methods=["POST"])
