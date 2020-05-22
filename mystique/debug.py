@@ -43,13 +43,16 @@ class Debug:
         image = image.convert("RGB")
         image_np = np.asarray(image)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-        predict_card = PredictCard(self.od_model)
+        image_copy = image_np.copy()
+
         # Extract the design objects from faster rcnn model
-        output_dict, category_index = self.od_model.get_objects(image=image_np)
+        predict_card = PredictCard(self.od_model)
+        output_dict, category_index = self.od_model.get_objects(
+            image=image_np
+        )
 
         # If the debug endpoint is hit returns te faster rcnn model
         # detected boundary boxes in a image
-        image_copy = image_np
         vis_util.visualize_boxes_and_labels_on_image_array(
             image_np,
             output_dict["detection_boxes"],
@@ -63,20 +66,19 @@ class Debug:
             skip_labels=True,
             min_score_thresh=0.9
         )
+
         debug_output = {}
         json_objects, detected_coords = predict_card.collect_objects(
             output_dict=output_dict, pil_image=image)
+
         # Detect image coordinates inside the card design
-        image_np = image.convert("RGB")
-        image_np = np.asarray(image_np)
-        image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         image_extraction = ImageExtraction()
         image_model_base64_string = image_extraction.get_image_with_boundary_boxes(
-            image=image_np, detected_coords=detected_coords, pil_image=image,
-            faster_rcnn_image=image_copy)
+            image=image_copy, detected_coords=detected_coords, pil_image=image,
+            faster_rcnn_image=image_np)
         debug_output["image"] = image_model_base64_string
 
         # generate card from existing workflow
         predict_json = predict_card.main(image=image, card_format=card_format)
-        debug_output["predict_json"] = predict_json
+        debug_output.update(predict_json)
         return debug_output
