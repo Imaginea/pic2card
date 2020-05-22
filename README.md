@@ -37,7 +37,9 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 You can build a docker image from the source code and play with it.
 
 Docker build supports two types of image generation,
+
 a. A single image which embed frozen model with it.
+
 b. Image which has only the service layer, the model will be consumed from the
    tensorflow serving. Right now this part is experimental state only.
 

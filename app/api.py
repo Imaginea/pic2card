@@ -39,6 +39,7 @@ api.add_resource(res.GetCardTemplates, '/get_card_templates',
 
 # Conditional loading helps to reduce the bundle size, as we don't need to
 # package the tensorflow.
+# TODO: Experimental API
 if config.ENABLE_TF_SERVING:
     api.add_resource(res.TfPredictJson, '/tf_predict_json',
                      methods=['POST'])
@@ -53,4 +54,6 @@ else:
 app.od_model = ObjectDetection(*set_graph_and_tensors(tensors =
                                 ["detection_boxes", "detection_scores",
                                 "detection_classes", "detection_masks"]))
+
+# Include more debug points along with /predict_json api.
 api.add_resource(res.DebugEndpoint, "/predict_json_debug", methods=["POST"])
