@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_final</folder>
+	<folder>train_actionset</folder>
 	<filename>74.png</filename>
-	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/74.png</path>
+	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/train_actionset/74.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -117,6 +117,78 @@
 			<ymin>443</ymin>
 			<xmax>256</xmax>
 			<ymax>470</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>24</xmin>
+			<ymin>56</ymin>
+			<xmax>137</xmax>
+			<ymax>112</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>146</xmin>
+			<ymin>56</ymin>
+			<xmax>256</xmax>
+			<ymax>112</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>25</xmin>
+			<ymin>185</ymin>
+			<xmax>165</xmax>
+			<ymax>246</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>174</xmin>
+			<ymin>188</ymin>
+			<xmax>294</xmax>
+			<ymax>247</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>303</xmin>
+			<ymin>186</ymin>
+			<xmax>413</xmax>
+			<ymax>247</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>actionset</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>27</xmin>
+			<ymin>475</ymin>
+			<xmax>136</xmax>
+			<ymax>534</ymax>
 		</bndbox>
 	</object>
 </annotation>

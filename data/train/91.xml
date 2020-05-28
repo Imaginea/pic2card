@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_final</folder>
+	<folder>train_actionset</folder>
 	<filename>91.png</filename>
-	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/91.png</path>
+	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/train_actionset/91.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -120,15 +120,15 @@
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>22</xmin>
-			<ymin>459</ymin>
-			<xmax>105</xmax>
-			<ymax>486</ymax>
+			<xmin>13</xmin>
+			<ymin>457</ymin>
+			<xmax>109</xmax>
+			<ymax>490</ymax>
 		</bndbox>
 	</object>
 </annotation>

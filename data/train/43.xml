@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_final</folder>
+	<folder>train</folder>
 	<filename>43.jpg</filename>
-	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/43.jpg</path>
+	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/train/43.jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -168,7 +168,7 @@
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>

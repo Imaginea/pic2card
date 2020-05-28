@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_final</folder>
+	<folder>train_actionset</folder>
 	<filename>98.png</filename>
-	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/98.png</path>
+	<path>/home/keerthanamanoharan/Documents/office_work/Pic2Code/dataset_final/train_actionset/98.png</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,22 +17,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>130</xmin>
-			<ymin>22</ymin>
-			<xmax>381</xmax>
-			<ymax>53</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>textbox</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>127</xmin>
-			<ymin>61</ymin>
-			<xmax>350</xmax>
-			<ymax>86</ymax>
+			<xmin>124</xmin>
+			<ymin>21</ymin>
+			<xmax>380</xmax>
+			<ymax>55</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -42,9 +30,21 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>124</xmin>
-			<ymin>99</ymin>
-			<xmax>190</xmax>
-			<ymax>119</ymax>
+			<ymin>59</ymin>
+			<xmax>352</xmax>
+			<ymax>93</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>textbox</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>125</xmin>
+			<ymin>96</ymin>
+			<xmax>200</xmax>
+			<ymax>126</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -54,57 +54,57 @@
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>12</xmin>
-			<ymin>183</ymin>
-			<xmax>506</xmax>
+			<ymin>176</ymin>
+			<xmax>508</xmax>
 			<ymax>278</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>13</xmin>
-			<ymin>286</ymin>
-			<xmax>80</xmax>
-			<ymax>318</ymax>
+			<xmin>12</xmin>
+			<ymin>280</ymin>
+			<xmax>83</xmax>
+			<ymax>326</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>98</xmin>
-			<ymin>285</ymin>
-			<xmax>209</xmax>
-			<ymax>319</ymax>
+			<xmin>88</xmin>
+			<ymin>280</ymin>
+			<xmax>213</xmax>
+			<ymax>326</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>228</xmin>
-			<ymin>290</ymin>
-			<xmax>300</xmax>
-			<ymax>319</ymax>
+			<xmin>220</xmin>
+			<ymin>280</ymin>
+			<xmax>312</xmax>
+			<ymax>327</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>textbox</name>
+		<name>actionset</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>329</xmin>
-			<ymin>288</ymin>
-			<xmax>383</xmax>
-			<ymax>319</ymax>
+			<xmin>315</xmin>
+			<ymin>280</ymin>
+			<xmax>395</xmax>
+			<ymax>328</ymax>
 		</bndbox>
 	</object>
 </annotation>
