@@ -13,16 +13,23 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
 ## Process flow for card prediction
 1. Using the service
    
-   1. By curl:
-    ``` shell
-       curl --header "Content-Type: application/json" \
-       --request POST \
-       --data '{"image":"base64 of the image"}'
-    https://mystique.azurewebsites.net/predict_json
+    ```shell
+    # Setup dependency under a virtualenv
+    $ virtualenv ~/env
+    $ . ~/env/bin/activate
+    (env)$ pip install -r requirements.txt
+    (env)$ pip install -r requirements-frozen_graph.txt # tf specific only
+    
+    # Start the service.
+    (env)$ python -m app.main
+    
+    # Hit the API using curl
+    $ (env) curl --header "Content-Type: application/json" \
+            --request POST \
+            --data '{"image":"base64 of the image"}' \
+            https://localhost:5050/predict_json
     ```
-    2.  Or on uploading or selecting any card design image templates , using the [service ui](https://mystique-app.azurewebsites.net/)
-
-
+    
 ![Working Screenshot](./images/working1.jpg)
 
 ![Working Screenshot](./images/working2.png)
@@ -96,14 +103,14 @@ After the [Tensorflow ,Tensorflow models intsallation](https://tensorflow-object
   ```shell
   #Generate tf records for training and testing dataset
   python commands/generate_tfrecord.py \
-  --csv_input=/data/train_labels.csv \
-  --image_dir=/data/train \
-  --output_path=/tf_records/train.record
+     --csv_input=/data/train_labels.csv \
+     --image_dir=/data/train \
+     --output_path=/tf_records/train.record
 
   python commands/generate_tfrecord.py \
-  --csv_input=/data/test_labels.csv \
-  --image_dir=/data/test \
-  --output_path=/tf_records/test.record
+     --csv_input=/data/test_labels.csv \
+     --image_dir=/data/test \
+     --output_path=/tf_records/test.record
 
   ```
 
@@ -129,9 +136,9 @@ After the [Tensorflow ,Tensorflow models intsallation](https://tensorflow-object
 
   ```shell
   python commands/train.py \
-  --logtostderr \
-  --model_dir=training/ \
-  --pipeline_config_path=../training/pipeline.config
+     --logtostderr \
+     --model_dir=training/ \
+     --pipeline_config_path=../training/pipeline.config
   ```
 
   ​
@@ -143,10 +150,10 @@ After the [Tensorflow ,Tensorflow models intsallation](https://tensorflow-object
   #change XXXX to represent the highest number of trained model 
 
   python commands/export_inference_graph.py \
-  --input_type image_tensor \
-  --pipeline_config_path training/pipeline.config \
-  --trained_checkpoint_prefix training/model.ckpt-XXXX \
-  --output_directory ../inference_graph
+     --input_type image_tensor \
+     --pipeline_config_path training/pipeline.config \
+     --trained_checkpoint_prefix training/model.ckpt-XXXX \
+     --output_directory ../inference_graph
   ```
 
 8. Can view the rcnn trained model's beaviour using the Jupyter notebook available under notebooks
