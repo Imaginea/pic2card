@@ -240,7 +240,7 @@ class CardArrange:
         if design_object.get("object") == "actionset":
             body.append({
                 "type": "ActionSet",
-                "separator": "true",
+                # "separator": "true",
                 "actions": [{
                     "type": "Action.Submit",
                     "title": design_object.get("data"),
