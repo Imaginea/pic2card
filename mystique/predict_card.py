@@ -15,7 +15,7 @@ import requests
 from mystique.arrange_card import CardArrange
 from mystique.extract_properties import ExtractProperties
 from mystique.image_extraction import ImageExtraction
-from mystique.generate_template_data_payload import DataBinding
+from mystique.card_template import DataBinding
 from mystique import config
 
 
@@ -183,20 +183,17 @@ class PredictCard:
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
         }
 
-        # if format==template - generate template data json
-        if card_format == "template":
-            databinding = DataBinding()
-            data_payload = databinding.build_data_binding_payload(
-                json_objects["objects"])
-            return_dict["card_v2_json"] = {}.fromkeys(["data", "template"], {})
-            return_dict["card_v2_json"]["data"] = data_payload
-
         body, ymins = card_arrange.build_card_json(
             objects=json_objects.get("objects", []))
         # Sort the elements vertically
         body = [x for _, x in sorted(zip(ymins, body),
                                      key=lambda x: x[0])]
-
+        # if format==template - generate template data json
+        if card_format == "template":
+            databinding = DataBinding()
+            data_payload, body = databinding.build_data_binding_payload(body)
+            return_dict["card_v2_json"] = {}.fromkeys(["data", "template"], {})
+            return_dict["card_v2_json"]["data"] = data_payload
         # Prepare the response with error code
         error = None
         if not body or not detected_coords:
