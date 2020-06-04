@@ -1,5 +1,13 @@
-# Pic2Card
+# Pic2Card 
+
 ![pic2card-build](https://github.com/Imaginea/pic2card/workflows/pic2card-build/badge.svg?branch=master)
+
+## **NOTE**
+
+This proeject has been migrated to [microsoft/Adaptivecards](https://github.com/microsoft/AdaptiveCards/tree/master/source/pic2card) repo. All furture developments are happening directly on the microsoft repo.
+
+
+
 ## Description
 Pic2Card is a solution for converting adaptive cards GUI design image into adaptive card payload Json.
 
