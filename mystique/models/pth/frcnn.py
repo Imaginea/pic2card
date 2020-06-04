@@ -1,17 +1,6 @@
-
 import torch
-import torchvision
-import torchvision.transforms as T
-from torch.utils.tensorboard import SummaryWriter
-
-import skimage
-from PIL import Image
 from detecto.core import Model
-from detecto.visualize import detect_live, detect_video, plot_prediction_grid, show_labeled_image
-from detecto.core import DataLoader, Dataset
-from detecto.utils import read_image, xml_to_csv, normalize_transform
-
-import matplotlib.pyplot as plt
+from detecto.core import DataLoader
 
 
 class CustomModel(Model):
@@ -26,8 +15,9 @@ class CustomModel(Model):
         """
         pass
 
-    def fit(self, dataset, val_dataset=None, epochs=10, learning_rate=0.0005, momentum=0.9,
-        weight_decay=0.0005, gamma=0.1, lr_step_size=3, verbose=False):
+    def fit(self, dataset, val_dataset=None, epochs=10,
+            learning_rate=0.0005, momentum=0.9,
+            weight_decay=0.0005, gamma=0.1, lr_step_size=3, verbose=False):
 
         # If doing custom training, the given images will most likely be
         # normalized. This should fix the issue of poor performance on
@@ -43,14 +33,21 @@ class CustomModel(Model):
             val_dataset = DataLoader(val_dataset)
 
         losses = []
-        # Get parameters that have grad turned on (i.e. parameters that should be trained)
+        # Get parameters that have grad turned on (i.e. parameters that should
+        # be trained)
         parameters = [p for p in self._model.parameters() if p.requires_grad]
-        # Create an optimizer that uses SGD (stochastic gradient descent) to train the parameters
-        optimizer = torch.optim.SGD(parameters, lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
-        # Create a learning rate scheduler that decreases learning rate by gamma every lr_step_size epochs
-        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=lr_step_size, gamma=gamma)
+        # Create an optimizer that uses SGD (stochastic gradient descent)
+        # to train the parameters
+        optimizer = torch.optim.SGD(parameters, lr=learning_rate,
+                                    momentum=momentum,
+                                    weight_decay=weight_decay)
+        # Create a learning rate scheduler that decreases learning rate
+        # by gamma every lr_step_size epochs
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=lr_step_size, gamma=gamma)
 
-        # Train on the entire dataset for the specified number of times (epochs)
+        # Train on the entire dataset for the specified number of
+        # times (epochs)
         for epoch in range(epochs):
             if verbose:
                 print('Epoch {} of {}'.format(epoch + 1, epochs))
@@ -62,18 +59,19 @@ class CustomModel(Model):
                 self._convert_to_int_labels(targets)
                 images, targets = self._to_device(images, targets)
 
-                # Calculate the model's loss (i.e. how well it does on the current
-                # image and target, with a lower loss being better)
+                # Calculate the model's loss (i.e. how well it does on the
+                # current image and target, with a lower loss being better)
                 loss_dict = self._model(images, targets)
                 total_loss = sum(loss for loss in loss_dict.values())
                 avg_train_loss += total_loss
-                #print(f"Batch: {len(images)}, loss: {total_loss}")
-
+                # print(f"Batch: {len(images)}, loss: {total_loss}")
                 # Zero any old/existing gradients on the model's parameters
                 optimizer.zero_grad()
-                # Compute gradients for each parameter based on the current loss calculation
+                # Compute gradients for each parameter based on the current
+                # loss calculation
                 total_loss.backward()
-                # Update model parameters from gradients: param -= learning_rate * param.grad
+                # Update model parameters from gradients:
+                # param -= learning_rate * param.grad
                 optimizer.step()
 
             avg_train_loss /= len(dataset)

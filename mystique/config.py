@@ -16,3 +16,14 @@ ENABLE_TF_SERVING = os.environ.get("ENABLE_TF_SERVING",
 # image hosting max size and default image url
 IMG_MAX_HOSTING_SIZE = 1000000
 DEFAULT_IMG_HOSTING = "https://lh3.googleusercontent.com/-snm-WznsB3k/XrAWKVCBC3I/AAAAAAAAB8Y/tR-2f8CzboQCmyTzrAfj9Xtvnbeh9PJ8QCK8BGAsYHg/s0/2020-05-04.png"
+
+
+# Class labels
+ID_TO_LABEL = {
+    1: "textbox",
+    2: "radiobutton",
+    3: "checkbox",
+    4: "actionset",
+    5: "image",
+    6: "rating"
+}
