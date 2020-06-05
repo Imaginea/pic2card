@@ -2,6 +2,7 @@
 Gloabal settings and constants.
 """
 import os
+import pathlib
 
 # max 2mb
 IMG_MAX_UPLOAD_SIZE = 2e+6
@@ -12,6 +13,11 @@ TF_SERVING_URL = os.environ.get("TF_SERVING_URL",
 TF_SERVING_MODEL_NAME = "mystique"
 ENABLE_TF_SERVING = os.environ.get("ENABLE_TF_SERVING",
                                    False)
+
+# Pytorch model settings.
+PTH_MODEL_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "../model/pth_models/faster-rcnn-2020-05-31-1590943544-epochs_25.pth")
 
 # image hosting max size and default image url
 IMG_MAX_HOSTING_SIZE = 1000000

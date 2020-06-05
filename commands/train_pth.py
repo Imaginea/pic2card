@@ -23,7 +23,6 @@ from torch.utils.tensorboard import SummaryWriter
 @click.option("--epochs", default=10, help="Number of epochs",
               required=False)
 def train_frcnn(train_dir, val_dir, save_dir, epochs):
-
     # Create the labels out of the xml files on the fly
     train_labels = xml_to_csv(
             train_dir,

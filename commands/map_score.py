@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from mystique.initial_setups import set_graph_and_tensors
-from mystique.detect_objects import ObjectDetection
+from mystique.detect_objects import ObjectDetection, PtObjectDetection
 from mystique.utils import xml_to_csv, id_to_label
 
 
@@ -33,11 +33,18 @@ from mystique.utils import xml_to_csv, id_to_label
     help="Export the ground trught labels to this dir, use the same img name",
     required=True)
 @click.option(
+    "--model-fw",
+    type=click.Choice(["tf", "pytorch"], case_sensitive=False),
+    help="Model framework tf/pytorch",
+    required=True)
+@click.option(
     "--bbox-min-score",
     help="Minimum bbox score from the model to be considered.",
     default=0.9,
     required=False)
-def generate_map(test_dir, ground_truth_dir, pred_truth_dir, bbox_min_score):
+def generate_map(test_dir, ground_truth_dir, pred_truth_dir,
+                 model_fw,
+                 bbox_min_score):
     # columns used: filename, xmin, ymin, xmax, ymax
     gt_dir = pathlib.Path(ground_truth_dir)
     pd_dir = pathlib.Path(pred_truth_dir)
@@ -47,33 +54,27 @@ def generate_map(test_dir, ground_truth_dir, pred_truth_dir, bbox_min_score):
     not os.path.exists(ground_truth_dir) and os.mkdir(ground_truth_dir)
     not os.path.exists(pred_truth_dir) and os.mkdir(pred_truth_dir)
 
+    if model_fw == "tf":
+        object_detection = ObjectDetection(*set_graph_and_tensors())
+    elif model_fw == "pytorch":
+        object_detection = PtObjectDetection()
+
     data_df = xml_to_csv(test_dir)
-    object_detection = ObjectDetection(*set_graph_and_tensors())
     images = np.unique(data_df['filename'].tolist())
 
     for img_name in images:
-        image = Image.open(f"{test_dir}/{img_name}")
-        image = image.convert("RGB")
-        width, height = image.size
-        image_np = np.asarray(image)
-        result, _index = object_detection.get_objects(image_np)
-
-        classes = result['detection_classes'].tolist()
-        scores = result['detection_scores'].tolist()
-        boxes = result['detection_boxes'].tolist()
+        img_path = f"{test_dir}/{img_name}"
+        classes, scores, boxes = object_detection.get_bboxes(img_path)
 
         # import pdb; pdb.set_trace()
         preds = []
         pred_iter = zip(classes, scores, boxes)
         for pred in pred_iter:
-            label_id, score, bbox = pred
+            # import pdb; pdb.set_trace()
+            label, bbox, score = pred
             if score > bbox_min_score:
-                ymin = bbox[0] * height
-                xmin = bbox[1] * width
-                ymax = bbox[2] * height
-                xmax = bbox[3] * width
                 preds.append(
-                    (id_to_label(label_id), score, xmin, ymin, xmax, ymax)
+                    (label, score, bbox[0], bbox[1], bbox[2], bbox[3])
                 )
 
         columns = ['class', 'score', 'xmin', 'ymin', 'xmax', 'ymax']
