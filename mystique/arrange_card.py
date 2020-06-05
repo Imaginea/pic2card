@@ -250,7 +250,7 @@ class CardArrange:
         if design_object.get("object") == "actionset":
             body.append({
                 "type": "ActionSet",
-                # "separator": "true",
+                # "separator": "true", # Issue in data binding if separator is set to True
                 "actions": [{
                     "type": "Action.Submit",
                     "title": design_object.get("data"),
