@@ -1,5 +1,7 @@
 """Module for arranging the design elements for the Card json"""
 
+import collections
+
 from .image_extraction import ImageExtraction
 from .extract_properties import ExtractProperties
 
@@ -86,13 +88,19 @@ class CardArrange:
             object_json["horizontal_alignment"] = extract_properties.get_alignment(
                 image=pil_image, xmin=float(coords[0]), xmax=float(coords[2]))
             object_json["data"] = im
-            object_json["sizes"] = extract_properties.get_image_size(
-                image=pil_image,
-                image_cropped_size=image_sizes[ctr])
             object_json["xmin"] = coords[0]
             object_json["ymin"] = coords[1]
             object_json["xmax"] = coords[2]
             object_json["ymax"] = coords[3]
+            object_json["image_size"] = pil_image.size
+            # resize the image object size if the deisgn image is
+            # greater than 1000px width and height
+            width, height = image_sizes[ctr]
+            image_width, image_height = pil_image.size
+            if image_width > 1000 and image_height > 1000:
+                width = width*0.3
+                height = height*0.3
+            object_json["size"] = (round(width), round(height))
             object_json["coords"] = ",".join([str(coords[0]),
                                               str(coords[1]), str(coords[2]),
                                               str(coords[3])])
@@ -128,7 +136,7 @@ class CardArrange:
             if len(group) > 1:
                 image_set = {
                     "type": "ImageSet",
-                    "imageSize": "medium",
+                    "imageSize": "Auto",
                     "images": []
                 }
                 for design_object in group:
@@ -140,6 +148,8 @@ class CardArrange:
                         "horizontalAlignment": design_object.
                         get("horizontal_alignment", ""),
                         "url": design_object.get("data"),
+                        "width": str(design_object.get("size", (10, 10))[0])+"px",
+                        "height": str(design_object.get("size", (10, 10))[1])+"px",
                     }
                     image_set["images"].append(obj)
                 body.append(image_set)
@@ -251,16 +261,13 @@ class CardArrange:
             if ymins is not None:
                 ymins.append(design_object.get("ymin"))
         if design_object.get("object") == "image":
-            if is_column:
-                size = design_object.get("sizes")[0]
-            else:
-                size = design_object.get("sizes")[1]
             body.append({
                 "type": "Image",
                 "altText": "Image",
                 "horizontalAlignment": design_object.
                 get("horizontal_alignment", ""),
-                "size": size,
+                "width": str(design_object.get("size", (10, 10))[0])+"px",
+                "height": str(design_object.get("size", (10, 10))[1])+"px",
                 "url": design_object.get("data"),
             })
             if ymins is not None:

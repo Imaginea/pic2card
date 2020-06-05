@@ -64,41 +64,6 @@ class ExtractProperties:
             style = found_colors[index]
         return style
 
-    def get_image_size(self, image=None, image_cropped_size=None):
-        """[get the image size with respect to the card size]
-
-        Keyword Arguments:
-            image {[PIL image]} -- [input PIL image] (default: {None})
-            image_cropped_size {[tuple]} -- [tuple of cropped image 
-            width and height] (default: {None})
-
-        Returns:
-            [list] -- [list of sizes withrespect to columnset 
-            and inidiuval element]
-        """
-        sizes = ["Auto", "Auto"]
-        image_width, image_height = image.size
-        area_proportionate = (
-            (image_cropped_size[0]*image_cropped_size[1]) /
-            (image_width*image_height)
-        )*100
-        if area_proportionate >= 0 and area_proportionate <= 1:
-            sizes[0] = "Auto"
-        elif area_proportionate > 1 and area_proportionate <= 3:
-            sizes[0] = "Small"
-        elif area_proportionate > 3 and area_proportionate <= 5:
-            sizes[0] = "Medium"
-        elif area_proportionate > 5:
-            sizes[0] = "Large"
-
-        if area_proportionate >= 0 and area_proportionate < 4:
-            sizes[1] = "Small"
-        elif area_proportionate >= 4 and area_proportionate <= 9:
-            sizes[1] = "Medium"
-        elif area_proportionate > .0:
-            sizes[1] = "Auto"
-        return sizes
-
     def get_text(self, image=None, coords=None):
         """
         Extract the text from the object coordinates 
