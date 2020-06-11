@@ -29,7 +29,7 @@ Pic2Card is a solution for converting adaptive cards GUI design image into adapt
     $ (env) curl --header "Content-Type: application/json" \
             --request POST \
             --data '{"image":"base64 of the image"}' \
-            https://localhost:5050/predict_json
+            http://localhost:5050/predict_json
     ```
 
 ![Working Screenshot](./images/working1.jpg)
@@ -170,3 +170,28 @@ To run all tests
 ```
 python -m unittest discover
 ```
+
+## Measure the model performance
+
+We are using the standard mAP (Mean Average Precision) metric. Use the below
+command to generate the intermediate results so that can be used to generate the
+map metric.
+
+```bash
+
+# Test the default tf model
+$ python -m commands.map_score --test-dir <test-labelmg-dir> \
+    --ground-truth-dir ./out/ground-truth \
+    --pred-truth-dir ./out/detection-results
+    --model-fw tf
+
+```
+
+Currently `tf|pytorch` model implementations are added, in which tf is matured
+one. And you can enable the custom image extraction pipeline by passing the
+flag `--image-pipeline`.
+
+Once we generated the `out` folder, then we can use the command from [mAP](https://github.com/Cartucho/mAP.git)
+repository to see the score. You have to clone this repo and copy the out
+folder generate here under the input folder of the mAP command. Please refer
+the README to understand how to use the mAP command further.

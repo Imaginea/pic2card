@@ -42,9 +42,14 @@ from mystique.utils import xml_to_csv, id_to_label
     help="Minimum bbox score from the model to be considered.",
     default=0.9,
     required=False)
+@click.option(
+    "--image-pipeline",
+    help="Use the custom image pipeline for image coordinate extraction.",
+    is_flag=True)
 def generate_map(test_dir, ground_truth_dir, pred_truth_dir,
                  model_fw,
-                 bbox_min_score):
+                 bbox_min_score,
+                 image_pipeline):
     # columns used: filename, xmin, ymin, xmax, ymax
     gt_dir = pathlib.Path(ground_truth_dir)
     pd_dir = pathlib.Path(pred_truth_dir)
@@ -64,13 +69,13 @@ def generate_map(test_dir, ground_truth_dir, pred_truth_dir,
 
     for img_name in images:
         img_path = f"{test_dir}/{img_name}"
-        classes, scores, boxes = object_detection.get_bboxes(img_path)
+        classes, scores, boxes = object_detection.get_bboxes(img_path,
+                                                             image_pipeline)
 
         # import pdb; pdb.set_trace()
         preds = []
         pred_iter = zip(classes, scores, boxes)
         for pred in pred_iter:
-            # import pdb; pdb.set_trace()
             label, bbox, score = pred
             if score > bbox_min_score:
                 preds.append(

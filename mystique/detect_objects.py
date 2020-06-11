@@ -14,6 +14,7 @@ from detecto.utils import read_image, normalize_transform
 
 from mystique.utils import id_to_label
 from mystique import config
+from mystique.image_extraction import ImageExtraction
 
 
 if StrictVersion(tf.__version__) < StrictVersion("1.9.0"):
@@ -56,7 +57,7 @@ class PtObjectDetection:
         """ Load the saved model and pass the required classes """
         return Model.load(self.model_path, classes=self.classes)
 
-    def get_bboxes(self, image_path: str) -> Dict:
+    def get_bboxes(self, image_path: str, img_pipeline=None) -> Dict:
         """
         Do inference and return the bounding boxes compatible to caller.
         """
@@ -83,17 +84,41 @@ class ObjectDetection:
         self.category_index = category_index
         self.tensor_dict = tensor_dict
 
-    def get_bboxes(self, image_path: str) -> Tuple:
+    def _img_preprocess(self, image_path: str) -> Tuple[Image.Image, np.array]:
         """
-        Get the bounding boxes with scores and label.
+        Image preprocessing and convert to tensor.
         """
         image = Image.open(image_path)
         width, height = image.size
         image = image.convert("RGB")
-        width, height = image.size
         image_np = np.asarray(image)
-        result, _index = self.get_objects(image_np)
+        return image, image_np
 
+    def get_image_coordinates(self, image: Image,
+                              image_np: np.array, result: Dict):
+        """
+        Custom pipeline written outside the model to extract
+        image coordinates.
+        """
+        from mystique.predict_card import PredictCard
+        predict_card = PredictCard()
+
+        json_objects, detected_coords = predict_card.collect_objects(
+            output_dict=result, pil_image=image
+        )
+        ie = ImageExtraction()
+        image_points = ie.detect_image(image=image_np,
+                                       detected_coords=detected_coords,
+                                       pil_image=image)
+        return image_points
+
+    def get_bboxes(self, image_path: str, img_pipeline=False) -> Tuple:
+        """
+        Get the bounding boxes with scores and label.
+        """
+        image, image_np = self._img_preprocess(image_path)
+        width, height = image.size
+        result, _index = self.get_objects(image_np)
         classes = [id_to_label(i) for i in result['detection_classes']]
         scores = result['detection_scores'].tolist()
         boxes = result['detection_boxes'].tolist()
@@ -106,6 +131,12 @@ class ObjectDetection:
             ymax = bbox[2] * height
             xmax = bbox[3] * width
             bbox_dnorm.append([xmin, ymin, xmax, ymax])
+
+        if img_pipeline:
+            image_points = self.get_image_coordinates(image, image_np, result)
+            classes = ["image"] * len(image_points) + classes
+            scores = [1.0] * len(image_points) + scores
+            bbox_dnorm = image_points + bbox_dnorm
 
         return classes, bbox_dnorm, scores
 
@@ -127,7 +158,6 @@ class ObjectDetection:
         @param image: numpy array of input design image
         @return: output dict of objects, classes and coordinates
         """
-
         # Run inference
         detection_graph = self.detection_graph
         with detection_graph.as_default():

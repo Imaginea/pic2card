@@ -2,7 +2,6 @@
 Gloabal settings and constants.
 """
 import os
-import pathlib
 
 # max 2mb
 IMG_MAX_UPLOAD_SIZE = 2e+6
@@ -13,6 +12,10 @@ TF_SERVING_URL = os.environ.get("TF_SERVING_URL",
 TF_SERVING_MODEL_NAME = "mystique"
 ENABLE_TF_SERVING = os.environ.get("ENABLE_TF_SERVING",
                                    False)
+TF_FROZEN_MODEL_PATH = os.path.join(os.path.dirname(__file__),
+                                    "../model/frozen_inference_graph.pb")
+TF_LABEL_PATH = os.path.join(os.path.dirname(__file__),
+                             "training/object-detection.pbtxt")
 
 # Pytorch model settings.
 PTH_MODEL_PATH = os.path.join(
