@@ -9,7 +9,7 @@
     },
     "dependencies": {
         "adaptivecards": "^1.2.5",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "core-js": "^3.6.4",
         "konva": "^6.0.0",
         "markdown-it": "^10.0.0",
